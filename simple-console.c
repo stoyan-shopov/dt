@@ -509,11 +509,16 @@ int i, j;
 /*! \todo	this sucks... */
 void user_putchar(int c)
 {
-	asm("pushfl");
-	asm("cli");
+unsigned long flags;
+	asm volatile ("pushfl\n"
+			"popl %0\n"
+			"cli\n"
+			: "=m"(flags) );
 	c == '\n' ? (put_enter(), video_console.cursor_lock_position = 0)
 		: (console_character_input(c), video_console.cursor_lock_position = video_console.cursor_column);
-		asm("popfl");
+	asm volatile ("pushl %0\n"
+			"popfl\n"
+			: "m="(flags) );
 }
 /*
 int user_getchar(void)
