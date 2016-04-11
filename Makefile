@@ -1,4 +1,6 @@
-CC = gcc
+CC = i686-elf-gcc -ffreestanding
+AS = i686-elf-gcc -c -ffreestanding -Wa,--divide
+
 CFLAGS += -m32 -I. -I./sforth/ -g
 CFLAGS += -DENGINE_32BIT -DCORE_CELLS_COUNT="32 * 1024" -DSTACK_DEPTH=32
 # CFLAGS += -fomit-frame-pointer -fdata-sections -ffunction-sections 
@@ -22,7 +24,7 @@ KERNEL_START = 36864
 
 # the total size of the floppy image
 IMAGE_SIZE = 1474560
-EXECUTABLE_EXTENSION=.exe
+EXECUTABLE_EXTENSION=
 
 all: clean $(SFORTH_ESCAPED_CODE_FILES) dt.img
 
@@ -32,10 +34,19 @@ dumps:
 	objdump -x kernel.exe > img.txt
 	objdump -d -S kernel.exe > dis.txt
 
+%: %.s
+	$(CC) -m32 -nostdlib -Wa,--divide -Wl,-eentry_point -T $(basename $@).ld -o $@ $<
+
+%.bin: %
+	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
+
+%.efs: %.fs
+	./stresc < $^ > $@
+
 boot.bin: boot
 	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
-boot: boot.s
-	$(CC) -m32 -nostdlib -Wl,-eentry_point -T boot.ld -o $@ $<
+#boot: boot.s
+#$(CC) -m32 -nostdlib -Wl,-eentry_point -T boot.ld -o $@ $<
 	
 
 kernel.bin: kernel
@@ -45,21 +56,8 @@ kernel: $(KOBJECTS) $(SFORTH_OBJECTS)
 
 kinit.bin: kinit
 	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
-kinit: $(KINIT_OBJECTS)
-	$(CC) -m32 -o $@ -nostdlib -T kinit.ld $^
-#
-#
-# escaped sforth code
-#
-#
-arena.efs: arena.fs
-	./stresc < $^ > $@
-pci.efs: pci.fs
-	./stresc < $^ > $@
-init.efs: init.fs
-	./stresc < $^ > $@
-ata.efs: ata.fs
-	./stresc < $^ > $@
+kinit: kinit.s
+	$(CC) -m32 -nostdlib -Wa,--divide -Wl,-eentry_point -T boot.ld -o $@ $<
 
 clean:
 	-rm boot.bin boot kinit.bin kinit kernel.bin kernel \

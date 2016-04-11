@@ -37,30 +37,13 @@ THE SOFTWARE.
 .global read_io_port_long
 .global write_io_port_long
 
-
-.global _load_idtr
-.global __8259a_remap
-.global __8259a_set_mask
-.global __8042_init
-.global _keyboard_interrupt_handler
-.global _mouse_interrupt_handler
-.global _read_io_port_byte
-.global _write_io_port_byte
-.global _read_io_port_word
-.global _write_io_port_word
-.global _read_io_port_long
-.global _write_io_port_long
-
-
 load_idtr:
-_load_idtr:
 	lidt	x86_idtr_value
 	ret
 
 
 	/* 1 parameter - io port (16 bit) */
 read_io_port_byte:
-_read_io_port_byte:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	inb	%dx,	%al
@@ -70,7 +53,6 @@ _read_io_port_byte:
 
 	/* 2 parameters - io port (16 bit), value */
 write_io_port_byte:
-_write_io_port_byte:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	movl	12(%esp),	%eax
@@ -80,7 +62,6 @@ _write_io_port_byte:
 
 	/* 1 parameter - io port (16 bit) */
 read_io_port_word:
-_read_io_port_word:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	inw	%dx,	%ax
@@ -90,7 +71,6 @@ _read_io_port_word:
 
 	/* 2 parameters - io port (16 bit), value */
 write_io_port_word:
-_write_io_port_word:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	movl	12(%esp),	%eax
@@ -100,7 +80,6 @@ _write_io_port_word:
 
 	/* 1 parameter - io port (16 bit) */
 read_io_port_long:
-_read_io_port_long:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	inl	%dx,	%eax
@@ -109,7 +88,6 @@ _read_io_port_long:
 
 	/* 2 parameters - io port (16 bit), value */
 write_io_port_long:
-_write_io_port_long:
 	pushl	%edx
 	movl	8(%esp),	%edx
 	movl	12(%esp),	%eax
@@ -148,7 +126,6 @@ arguments:
 	offset2 - same for slave PIC: offset2..offset2+7
 */
 _8259a_remap:
-__8259a_remap:
 	/* note: master/slave is selected in hardware and is not reprogrammable */
 	/* icw1 - reinitialize pics */
 	pushl	%ebp
@@ -185,7 +162,6 @@ __8259a_remap:
 	ret
 
 _8259a_set_mask:
-__8259a_set_mask:
 	movl	4(%esp),	%eax
 	outb	%al,		$PIC1_DATA
 	movb	$0xef,		%al
@@ -379,13 +355,12 @@ keyboard_interrupt_handler_raw:
 	iret
 
 keyboard_interrupt_handler:
-_keyboard_interrupt_handler:
 	pushal
 	/* read scancode */
 	inb	$I8042_DATA_PORT,	%al
 	andl	$0xff,	%eax
 	pushl	%eax
-	call	_translate_scancode
+	call	translate_scancode
 	movb	%al,	0xb8000
 	popl	%eax
 
@@ -396,13 +371,12 @@ _keyboard_interrupt_handler:
 	iret
 
 mouse_interrupt_handler:
-_mouse_interrupt_handler:
 	pushal
 	/* read mouse byte */
 	inb	$I8042_DATA_PORT,	%al
 	andl	$0xff,	%eax
 	pushl	%eax
-	call	_mouse_handler
+	call	mouse_handler
 	popl	%eax
 	movb	$'M',	0xb8000
 
@@ -418,7 +392,7 @@ _mouse_interrupt_handler:
 .align	2
 x86_idtr_value:
 	.word	256 * 8 - 1
-	.long	_x86_idt
+	.long	x86_idt
 
 .end
 
@@ -479,6 +453,4 @@ uint16_t pic_get_isr(void)
 {
     return __pic_get_irq_reg(PIC_READ_ISR);
 }
-
-
 

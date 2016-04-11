@@ -25,7 +25,11 @@ PHYSICAL_KINIT_BASE	= PHYSICAL_KERNEL_BASE_ADDRESS - 0x8000
 
 .text
 .code16
-.org	0
+
+.globl entry_point
+
+entry_point:
+.org 0
 
 	jmp	load_kernel_proper
 

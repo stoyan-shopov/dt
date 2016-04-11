@@ -47,8 +47,6 @@ extern void init_console(void);
 extern void keyboard_interrupt_handler();
 extern void mouse_interrupt_handler();
 
-extern unsigned int _bss_start, _bss_end;
-
 jmp_buf jbuf;
 
 static uint8_t mouse_bytes[3], mouse_idx;
@@ -65,8 +63,10 @@ struct x86_idt_gate_descriptor idesc =
 };
 uint32_t x;
 int i;
-unsigned char * bss;
-extern void (* const init_startup) (void), (* const init_startup_end) (void);
+unsigned char * bss, * data_src, * data_dest;
+extern void (* const _init_startup) (void), (* const _init_startup_end) (void);
+extern char _data_start, _data_end, _idata_contents_start;
+extern unsigned int _bss_start, _bss_end;
 void (* const * finit) (void);
 
 	* (unsigned char *) 0xb8002 = 'A';
@@ -75,8 +75,15 @@ void (* const * finit) (void);
 	while (i --)
 		* bss ++ = 0;
 
-	finit = & init_startup;
-	while (finit != & init_startup_end)
+	* (unsigned char *) 0xb8002 = 'B';
+	i = (unsigned int) & _data_end - (unsigned int) & _data_start;
+	data_src = & _idata_contents_start;
+	data_dest = & _data_start;
+	while (i --)
+		* data_dest ++ = * data_src ++;
+
+	finit = & _init_startup;
+	while (finit != & _init_startup_end)
 		(* finit ++) ();
 
 	if (display_image_and_halt)
@@ -170,7 +177,3 @@ static void disable_caches(void)
 	"wbinvd\n"
 	);
 }
-
-
-
-int _Unwind_Resume, _Unwind_GetIP, _Unwind_Backtrace, _Unwind_GetGR, _Unwind_GetCFA;
