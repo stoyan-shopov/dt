@@ -36,6 +36,8 @@ THE SOFTWARE.
 .global write_io_port_word
 .global read_io_port_long
 .global write_io_port_long
+.global enable_paging_low
+.global enable_gate_a20
 
 load_idtr:
 	lidt	x86_idtr_value
@@ -387,6 +389,27 @@ mouse_interrupt_handler:
 
 	iret
 
+enable_gate_a20:
+
+	inb	$0x92,		%al
+	orb	$2,		%al
+	outb	%al,		$0x92
+	ret
+
+
+enable_paging_low:
+
+	movl	4(%esp),	%eax
+	orl	$(1 << 4),	%eax
+	movl	%eax,		%cr3
+	movl	%cr0,		%eax
+	orl	$(1 << 31),	%eax
+	movl	%eax,		%cr0
+
+	/* copied from 'sonar' */
+	ljmp	$0x10,	$1f		# clear prefetch queue
+1:
+	ret
 
 .data
 .align	2

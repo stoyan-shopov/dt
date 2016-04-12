@@ -69,6 +69,8 @@ extern char _data_start, _data_end, _idata_contents_start;
 extern unsigned int _bss_start, _bss_end;
 void (* const * finit) (void);
 
+	enable_gate_a20();
+
 	* (unsigned char *) 0xb8002 = 'A';
 	bss = (unsigned char *) & _bss_start;
 	i = (unsigned int) & _bss_end - (unsigned int) & _bss_start;
@@ -116,6 +118,9 @@ void (* const * finit) (void);
 
 	sf_init();
 	sf_eval(INITIAL_DT_SFORTH_CODE);
+
+	populate_initial_page_directory();
+	enable_paging();
 
 	do_quit();
 

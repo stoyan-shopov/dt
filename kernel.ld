@@ -23,8 +23,12 @@ SECTIONS
 		_idata_contents_start	= .;
 	} > rom
 
-	/* .data 0x100000 : AT ( ADDR ( .rdata ) + SIZEOF ( .rdata )) */
-	/* .data	: AT (__idata_contents_start) */
+	.init_pgdir_tab	:
+	{
+		.	=	ALIGN(4096);
+		*(.init_pgdir)
+	} >ram
+
 	.data	:
 	{
 		_data_start	= .;
