@@ -509,16 +509,11 @@ int i, j;
 /*! \todo	this sucks... */
 void user_putchar(int c)
 {
-unsigned long flags;
-	asm volatile ("pushfl\n"
-			"popl %0\n"
-			"cli\n"
-			: "=m"(flags) );
+unsigned irqflag = get_irq_flag_and_disable_irqs();
+
 	c == '\n' ? (put_enter(), video_console.cursor_lock_position = 0)
 		: (console_character_input(c), video_console.cursor_lock_position = video_console.cursor_column);
-	asm volatile ("pushl %0\n"
-			"popfl\n"
-			: "m="(flags) );
+	restore_irq_flag(irqflag);
 }
 /*
 int user_getchar(void)

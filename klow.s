@@ -38,6 +38,8 @@ THE SOFTWARE.
 .global write_io_port_long
 .global enable_paging_low
 .global enable_gate_a20
+.global get_irq_flag_and_disable_irqs
+.global restore_irq_flag
 
 load_idtr:
 	lidt	x86_idtr_value
@@ -396,6 +398,23 @@ enable_gate_a20:
 	outb	%al,		$0x92
 	ret
 
+get_irq_flag_and_disable_irqs:
+	pushfl
+	cli
+	popl	%eax
+	shl	$9,	%eax
+	andl	$1,	%eax
+	ret
+
+restore_irq_flag:
+	movl	4(%esp),	%eax
+	orl	%eax,	%eax
+	jz	1f
+	sti
+	ret
+1:
+	cli
+	ret
 
 enable_paging_low:
 
