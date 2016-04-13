@@ -27,14 +27,21 @@ SECTIONS
 	{
 		.	=	ALIGN(4096);
 		*(.init_pgdir)
-	} >ram
+	} > ram
+
+	.common-data	:
+	{
+		.	=	ALIGN(4096);
+		*(.common-data)
+	} > ram
 
 	.data	:
 	{
+		.	=	ALIGN(4096);
 		_data_start	= .;
 		*(.data)
 		_data_end	= .;
-	} >ram AT> rom
+	} > ram AT> rom
 
 	.	=	ALIGN(8);
 	.bss :

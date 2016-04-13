@@ -7,7 +7,8 @@ CFLAGS += -DENGINE_32BIT -DCORE_CELLS_COUNT="32 * 1024" -DSTACK_DEPTH=32
 # CFLAGS += -fomit-frame-pointer -fdata-sections -ffunction-sections 
 KINIT_OBJECTS = kinit.o
 KOBJECTS = kmain.o idt.o klow.o simple-console.o setjmp.o dictionary-ext.o \
-	   init-pgdir-tab.o
+	   init-pgdir-tab.o \
+	   common-data.o
 
 SFORTH_OBJECTS = sforth/engine.o sf-arch.o sforth/sf-opt-file.o sforth/sf-opt-string.o sforth/sf-opt-prog-tools.o
 SFORTH_ESCAPED_CODE_FILES = arena.efs pci.efs init.efs ata.efs

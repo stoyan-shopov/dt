@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 #include <stdbool.h>
 #include "simple-console.h"
+#include "common-data.h"
 
 static struct
 {
@@ -29,10 +30,10 @@ static struct
 }
 console_state =
 {
-	.shift_active	= 0,	
+	.shift_active	= 0,
 };
 
-static struct video_console video_console;
+static struct video_console * video_console = & video_console_primary;
 
 static struct
 {
@@ -46,7 +47,7 @@ void do_console_refresh(void)
 {
 unsigned irqflag = get_irq_flag_and_disable_irqs();
 
-	xmemcpy(video_console.raw_video_memory, video_console.raw_video_contents, sizeof video_console.raw_video_contents);
+	xmemcpy(video_console->raw_video_memory, video_console->raw_video_contents, sizeof video_console->raw_video_contents);
 	restore_irq_flag(irqflag);
 }
 
@@ -89,26 +90,26 @@ int c;
 
 static void do_video_memory_refresh(void)
 {
-	xmemcpy(video_console.raw_video_memory, video_console.video_memory, sizeof video_console.video_memory);
+	xmemcpy(video_console->raw_video_memory, video_console->video_memory, sizeof video_console->video_memory);
 }
 static void do_draw_cursor(void)
 {
-	video_console.raw_video_memory[0][video_console.cursor_row][video_console.cursor_column].attributes
-		= video_console.video_memory[video_console.cursor_row][video_console.cursor_column].attributes = CHARACTER_ATTRIBUTE_CURSOR;
+	video_console->raw_video_memory[0][video_console->cursor_row][video_console->cursor_column].attributes
+		= video_console->video_memory[video_console->cursor_row][video_console->cursor_column].attributes = CHARACTER_ATTRIBUTE_CURSOR;
 }
 static void do_hide_cursor(void)
 {
-	video_console.raw_video_memory[0][video_console.cursor_row][video_console.cursor_column].attributes
-		= video_console.video_memory[video_console.cursor_row][video_console.cursor_column].attributes = CHARACTER_ATTRIBUTE_NORMAL;
+	video_console->raw_video_memory[0][video_console->cursor_row][video_console->cursor_column].attributes
+		= video_console->video_memory[video_console->cursor_row][video_console->cursor_column].attributes = CHARACTER_ATTRIBUTE_NORMAL;
 }
 
 static void do_console_scroll(void)
 {
 int i;
 	do_hide_cursor();
-	xmemcpy(video_console.video_memory, video_console.video_memory[1], (CONSOLE_ROWS - 1) * sizeof * video_console.video_memory);
+	xmemcpy(video_console->video_memory, video_console->video_memory[1], (CONSOLE_ROWS - 1) * sizeof * video_console->video_memory);
 	for (i = 0; i < CONSOLE_COLUMNS; i ++)
-		video_console.video_memory[CONSOLE_ROWS - 1][i].character = ' ';
+		video_console->video_memory[CONSOLE_ROWS - 1][i].character = ' ';
 	do_video_memory_refresh();
 	do_draw_cursor();
 }
@@ -118,10 +119,10 @@ void do_console_cleanup(void)
 int i, j;
 
 	do_hide_cursor();
-	xmemcpy(video_console.video_memory, video_console.video_memory[video_console.cursor_row], sizeof * video_console.video_memory);
+	xmemcpy(video_console->video_memory, video_console->video_memory[video_console->cursor_row], sizeof * video_console->video_memory);
 	for (i = 1; i < CONSOLE_ROWS; i ++)
 		for (j = 0; j < CONSOLE_COLUMNS; j ++)
-			video_console.video_memory[i][j].character = ' ';
+			video_console->video_memory[i][j].character = ' ';
 	do_video_memory_refresh();
 	do_draw_cursor();
 }
@@ -297,17 +298,17 @@ static int handle_backspace(void)
 {
 int i, j;
 
-	i = video_console.cursor_row;
-	j = video_console.cursor_column;
+	i = video_console->cursor_row;
+	j = video_console->cursor_column;
 
-	if (j > video_console.cursor_lock_position)
+	if (j > video_console->cursor_lock_position)
 	{
 		j --;
-		(* video_console.raw_video_memory)[i][j].character
-			= video_console.video_memory[i][j].character
+		(* video_console->raw_video_memory)[i][j].character
+			= video_console->video_memory[i][j].character
 				= ' ';
 		do_hide_cursor();
-		video_console.cursor_column = j;
+		video_console->cursor_column = j;
 		do_draw_cursor();
 	}
 	return 0;
@@ -324,7 +325,7 @@ static int handle_control(void)
 	console_state.control_active ^= 1;
 	do_console_cleanup();
 	do_hide_cursor();
-	video_console.cursor_row = 0;
+	video_console->cursor_row = 0;
 	do_draw_cursor();
 	return 0;
 }
@@ -333,15 +334,15 @@ static void put_enter(void)
 {
 int i;
 
-	i = video_console.cursor_row;
+	i = video_console->cursor_row;
 	if (i != CONSOLE_ROWS - 1)
 		i ++;
 	else
 		do_console_scroll();
 
 	do_hide_cursor();
-	video_console.cursor_row = i;
-	video_console.cursor_lock_position = video_console.cursor_column = 0;
+	video_console->cursor_row = i;
+	video_console->cursor_lock_position = video_console->cursor_column = 0;
 	do_draw_cursor();
 }
 
@@ -349,8 +350,8 @@ static int handle_enter(void)
 {
 int i;
 
-	for (i = video_console.cursor_lock_position; i < video_console.cursor_column; i ++)
-		console_ring_buffer_try_push(video_console.video_memory[video_console.cursor_row][i].character);
+	for (i = video_console->cursor_lock_position; i < video_console->cursor_column; i ++)
+		console_ring_buffer_try_push(video_console->video_memory[video_console->cursor_row][i].character);
 	if (console_ring_buffer_try_push('\n'))
 		put_enter();
 
@@ -428,16 +429,16 @@ void console_character_input(int c)
 {
 int i, j;
 
-	i = video_console.cursor_row;
-	j = video_console.cursor_column;
+	i = video_console->cursor_row;
+	j = video_console->cursor_column;
 
-	(* video_console.raw_video_memory)[i][j].character
-		= video_console.video_memory[i][j].character
+	(* video_console->raw_video_memory)[i][j].character
+		= video_console->video_memory[i][j].character
 			= c;
 	if (++ j == CONSOLE_COLUMNS)
 		j --;
 	do_hide_cursor();
-	video_console.cursor_column = j;
+	video_console->cursor_column = j;
 	do_draw_cursor();
 }
 
@@ -471,15 +472,15 @@ void init_console(void)
 {
 int i, j;
 
-	video_console.raw_video_memory = (void *) 0xb8000;
+	video_console->raw_video_memory = (void *) 0xb8000;
 	for (i = 0; i < CONSOLE_ROWS; i ++)
 		for (j = 0; j < CONSOLE_COLUMNS; j ++)
 		{
-			(* video_console.raw_video_memory)[i][j].character
-				= video_console.video_memory[i][j].character
+			(* video_console->raw_video_memory)[i][j].character
+				= video_console->video_memory[i][j].character
 					= ' ';
-			(* video_console.raw_video_memory)[i][j].attributes
-				= video_console.video_memory[i][j].attributes
+			(* video_console->raw_video_memory)[i][j].attributes
+				= video_console->video_memory[i][j].attributes
 					= CHARACTER_ATTRIBUTE_NORMAL;
 		}
 }
@@ -489,8 +490,8 @@ void user_putchar(int c)
 {
 unsigned irqflag = get_irq_flag_and_disable_irqs();
 
-	c == '\n' ? (put_enter(), video_console.cursor_lock_position = 0)
-		: (console_character_input(c), video_console.cursor_lock_position = video_console.cursor_column);
+	c == '\n' ? (put_enter(), video_console->cursor_lock_position = 0)
+		: (console_character_input(c), video_console->cursor_lock_position = video_console->cursor_column);
 	restore_irq_flag(irqflag);
 }
 /*

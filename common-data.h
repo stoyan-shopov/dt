@@ -20,40 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef __SIMPLE_CONSOLE_H__
-#define __SIMPLE_CONSOLE_H__
+#include "simple-console.h"
 
-#include <stdint.h>
-
-enum
-{
-	CONSOLE_ROWS			=	50,
-	CONSOLE_COLUMNS			=	80,
-	CONSOLE_RING_BUFFER_SIZE	=	1024,
-
-	CHARACTER_ATTRIBUTE_NORMAL	=	6 + 8,
-	CHARACTER_ATTRIBUTE_CURSOR	=	19,
-};
-
-struct video_console
-{
-	struct
-	{
-		union
-		{
-			struct video_memory
-			{
-				uint8_t	character;
-				uint8_t attributes;
-			}
-			video_memory[CONSOLE_ROWS][CONSOLE_COLUMNS];
-			uint16_t raw_video_contents[CONSOLE_ROWS * CONSOLE_COLUMNS];
-		};
-		volatile struct video_memory (* raw_video_memory)[CONSOLE_ROWS][CONSOLE_COLUMNS];
-	};
-	int	cursor_row, cursor_column;
-	int	cursor_lock_position;
-
-};
-
-#endif /* __SIMPLE_CONSOLE_H__ */
+extern struct video_console video_console_primary;
