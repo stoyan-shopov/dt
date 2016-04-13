@@ -1,6 +1,7 @@
 CC = i686-elf-gcc -ffreestanding
 AS = i686-elf-gcc -c -ffreestanding -Wa,--divide
 
+CFLAGS += -DFREESTANDING_ENVIRONMENT
 CFLAGS += -m32 -I. -I./sforth/ -g
 CFLAGS += -DENGINE_32BIT -DCORE_CELLS_COUNT="32 * 1024" -DSTACK_DEPTH=32
 # CFLAGS += -fomit-frame-pointer -fdata-sections -ffunction-sections 
