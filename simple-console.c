@@ -72,6 +72,14 @@ static struct
 }
 console_ring_buffer;
 
+void do_console_refresh(void)
+{
+unsigned irqflag = get_irq_flag_and_disable_irqs();
+
+	xmemcpy(video_console.raw_video_memory, video_console.raw_video_contents, sizeof video_console.raw_video_contents);
+	restore_irq_flag(irqflag);
+}
+
 /* assumed is that this is called from within interrupt context, and thus cannot block */
 static bool console_ring_buffer_try_push(int c)
 {
