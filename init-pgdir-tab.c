@@ -56,6 +56,8 @@ void populate_initial_page_directory(void)
 		};
 
 	for (i = 0; i < 1024; pgte.physical_address = i, init_pgdir_tab.pgtab[i ++] = pgte);
+	/* make the page at address 0 non-present, to catch null pointer dereference errors */
+	init_pgdir_tab.pgtab[0].present = PGTE_NOT_PRESENT;
 }
 
 void enable_paging(void)
