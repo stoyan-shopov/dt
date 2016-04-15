@@ -23,39 +23,38 @@ THE SOFTWARE.
 .globl setjmp
 .globl longjmp
 
-.globl _setjmp
-.globl _longjmp
-
 setjmp:
-_setjmp:
 	movl	4(%esp),	%eax
 	movl	%ebx,	(%eax)
 	movl	%ecx,	4(%eax)
 	movl	%edx,	8(%eax)
-	movl	%esp,	12(%eax)
-	movl	%ebp,	16(%eax)
+	movl	%esi,	12(%eax)
+	movl	%edi,	16(%eax)
+	movl	%esp,	20(%eax)
+	movl	%ebp,	24(%eax)
 	pushl	%ebx
 	/* save return address */
 	movl	4(%esp),	%ebx
-	movl	%ebx,	20(%eax)
+	movl	%ebx,	28(%eax)
 	popl	%ebx
 	xorl	%eax,	%eax
 	ret
 
 longjmp:
-_longjmp:
 	movl	4(%esp),	%eax
 	movl	8(%esp),	%ebx
-	movl	12(%eax),	%esp
+	movl	20(%eax),	%esp
 	/* put return address on the stack */
 	addl	$4,	%esp
-	pushl	20(%eax)
+	pushl	28(%eax)
 	/* save return value */
 	pushl	%ebx
 	movl	(%eax),		%ebx
 	movl	4(%eax),	%ecx
 	movl	8(%eax),	%edx
-	movl	16(%eax),	%ebp
+	movl	12(%eax),	%esi
+	movl	16(%eax),	%edi
+	movl	24(%eax),	%ebp
 	/* retrieve return value and make sure it is nonzero */
 	popl	%eax
 	orl	%eax,	%eax
@@ -63,4 +62,4 @@ _longjmp:
 	movl	$1,	%eax
 1:
 	ret
-	
+

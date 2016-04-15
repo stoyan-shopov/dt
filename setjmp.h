@@ -24,8 +24,8 @@ THE SOFTWARE.
 typedef struct
 {
 	/* saved are all general purpose registers, except %eax and the flags:
-	 * %ebx, %ecx, %edx, %esp, %ebp, return address */
-	uint32_t	registers[6];
+	 * %ebx, %ecx, %edx, %esi, %edi, %esp, %ebp, return address */
+	uint32_t	registers[8];
 }
 jmp_buf[1];
 
