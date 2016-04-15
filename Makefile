@@ -6,7 +6,7 @@ CFLAGS += -m32 -I. -I./sforth/ -g
 CFLAGS += -DENGINE_32BIT -DCORE_CELLS_COUNT="32 * 1024" -DSTACK_DEPTH=32
 # CFLAGS += -fomit-frame-pointer -fdata-sections -ffunction-sections 
 KINIT_OBJECTS = kinit.o
-KOBJECTS = kmain.o idt.o klow.o simple-console.o setjmp.o dictionary-ext.o \
+KOBJECTS = klow.o kmain.o idt.o simple-console.o setjmp.o dictionary-ext.o \
 	   init-pgdir-tab.o \
 	   common-data.o
 
@@ -33,7 +33,11 @@ EXECUTABLE_EXTENSION=
 all: clean $(SFORTH_ESCAPED_CODE_FILES) dt.img
 
 debug:
-	virtualbox --startvm dt --debug-command-line
+	virtualbox --startvm dt-github --debug-command-line
+run:
+	virtualbox --startvm dt-github
+dis:
+	i686-elf-objdump -d -S kernel > dis.txt
 dumps:
 	objdump -x kernel.exe > img.txt
 	objdump -d -S kernel.exe > dis.txt

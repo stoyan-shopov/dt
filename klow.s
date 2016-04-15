@@ -23,6 +23,7 @@ THE SOFTWARE.
 
 .extern	x86_idt
 .extern	translate_scancode
+.extern	kmain
 
 .global load_idtr
 .global _8259a_remap
@@ -40,6 +41,22 @@ THE SOFTWARE.
 .global enable_gate_a20
 .global get_irq_flag_and_disable_irqs
 .global restore_irq_flag
+
+kernel_entry_point:
+	/* copy any stack parameters, and relocate the stack */
+	/* assumed is that the top of the stack is set up at this location */
+	call	enable_gate_a20
+	movl	$.,	%ecx
+	movl	%ecx,	%esi
+	decl	%esi
+	subl	%esp,	%ecx
+	movl	$(0x200000 - 1),	%edi
+	std
+	rep	movsb
+	cld
+	incl	%edi
+	movl	%edi,	%esp
+	jmp	kmain
 
 load_idtr:
 	lidt	x86_idtr_value
