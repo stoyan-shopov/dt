@@ -25,6 +25,8 @@ THE SOFTWARE.
 .extern	translate_scancode
 .extern	kmain
 
+.global next_task_low
+.global invalidate_paging_tlb
 .global load_idtr
 .global _8259a_remap
 .global _8259a_set_mask
@@ -446,6 +448,50 @@ enable_paging_low:
 	ljmp	$0x10,	$1f		# clear prefetch queue
 1:
 	ret
+
+invalidate_paging_tlb:
+	movl	%cr3,	%eax
+	movl	%eax,	%cr3
+	ret
+
+.text
+next_task_low:
+/* parameters:
+ *	- address of first page table entry to adjust
+ *	- starting physical page number of the adjustment
+ *	- number of page table entries to adjust
+ *	- jump buffer address to use for longjmp
+ */
+	cli
+	popl	%eax	/* discard return address - this function never returns to its caller */
+	popl	%esi	/* address of first page table entry to adjust */
+	movl	%esi,	%edi
+	popl	%ebx	/* starting physical page number of the adjustment */
+	shll	$12,	%ebx	/* normalize */
+	popl	%ecx	/* number of page table entries to adjust */
+	popl	%edx	/* jump buffer address to use for longjmp */
+1:
+	lodsl
+	andl	$0xfff,		%eax
+	addl	%ebx,		%eax
+	addl	$0x1000,	%ebx
+	stosl
+	loop	1b
+	/* invalidate tlb */
+	movl	%cr3,	%eax
+	movl	%eax,	%cr3
+	/* load stack pointer before enabling interrupts and calling 'longjmp()'; otherwise the stack will get trashed */
+	movl	20(%edx),	%esp
+	sti
+	pushl	$1
+	pushl	%edx
+	call	longjmp
+	/* should never return here */
+	cli
+	hlt
+1:
+	jmp	1b
+
 
 .data
 .align	2

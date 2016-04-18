@@ -22,4 +22,9 @@ THE SOFTWARE.
 
 #include "common-data.h"
 
-struct video_console video_console_primary __attribute__((section(".common-data")));;
+jmp_buf context_0 __attribute__((section(".common-data")));
+jmp_buf context_1 __attribute__((section(".common-data")));
+
+int active_process __attribute__((section(".common-data")));
+
+struct video_console video_console_primary;

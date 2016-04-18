@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include "pgtable.h"
+#include "common-data.h"
 
 /* initial page directory and table used during the death track
  * kernel initialization; it is meant to identity map the first
@@ -63,5 +64,23 @@ void populate_initial_page_directory(void)
 void enable_paging(void)
 {
 	enable_paging_low(& init_pgdir_tab);
+}
+
+void next_task(void)
+{
+extern char _data_start;
+	if (!setjmp(active_process ? context_1 : context_0))
+	{
+		active_process ^= 1;
+		next_task_low(
+				init_pgdir_tab.pgtab + ((unsigned) & _data_start >> 12),		/* address of first page table entry to adjust */
+				((active_process ? 0x100000 : 0) + ((unsigned) & _data_start)) >> 12,	/* starting physical page number of the adjustment */
+				(0x200000 - (unsigned) & _data_start) >> 12,				/* number of page table entries to adjust */
+				active_process ? context_1 : context_0					/* jump buffer address to use for longjmp */
+			);
+
+	}
+	else
+		do_console_refresh();
 }
 

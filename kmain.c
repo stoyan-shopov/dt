@@ -114,11 +114,13 @@ void (* const * finit) (void);
 
 	init_console();
 
-	sf_init();
-	sf_eval(INITIAL_DT_SFORTH_CODE);
-
 	populate_initial_page_directory();
 	enable_paging();
+
+	fork();
+
+	sf_init();
+	sf_eval(INITIAL_DT_SFORTH_CODE);
 
 	do_quit();
 

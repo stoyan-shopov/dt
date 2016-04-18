@@ -19,11 +19,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-
 #include "simple-console.h"
-#include "setjmp.h"
+#include "common-data.h"
 
-extern jmp_buf context_0, context_1;
-extern int active_process;
+extern int _data_start;
 
-extern struct video_console video_console_primary;
+void fork(void)
+{
+	xmemcpy((void *) ((unsigned) & _data_start + 0x100000), & _data_start, 0x200000 - (unsigned) & _data_start);
+	if (!setjmp(context_1))
+		;//xmemcpy(context_1, context_0, sizeof context_0);
+	else
+	{
+		do_console_refresh();
+		* (unsigned char *) 0xb8002 = '!';
+	}
+}
+
