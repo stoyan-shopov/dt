@@ -33,9 +33,9 @@ EXECUTABLE_EXTENSION=
 all: clean $(SFORTH_ESCAPED_CODE_FILES) dt.img
 
 debug:
-	virtualbox --startvm dt-github --debug-command-line
+	virtualbox --startvm dt --debug-command-line
 run:
-	virtualbox --startvm dt-github
+	virtualbox --startvm dt
 dis:
 	i686-elf-objdump -d -S kernel > dis.txt
 dumps:
