@@ -88,10 +88,6 @@ int c;
 	return c;
 }
 
-static void do_video_memory_refresh(void)
-{
-	xmemcpy(video_console->raw_video_memory, video_console->video_memory, sizeof video_console->video_memory);
-}
 static void do_draw_cursor(void)
 {
 	video_console->raw_video_memory[0][video_console->cursor_row][video_console->cursor_column].attributes
@@ -110,7 +106,7 @@ int i;
 	xmemcpy(video_console->video_memory, video_console->video_memory[1], (CONSOLE_ROWS - 1) * sizeof * video_console->video_memory);
 	for (i = 0; i < CONSOLE_COLUMNS; i ++)
 		video_console->video_memory[CONSOLE_ROWS - 1][i].character = ' ';
-	do_video_memory_refresh();
+	do_console_refresh();
 	do_draw_cursor();
 }
 
@@ -123,7 +119,7 @@ int i, j;
 	for (i = 1; i < CONSOLE_ROWS; i ++)
 		for (j = 0; j < CONSOLE_COLUMNS; j ++)
 			video_console->video_memory[i][j].character = ' ';
-	do_video_memory_refresh();
+	do_console_refresh();
 	do_draw_cursor();
 }
 
