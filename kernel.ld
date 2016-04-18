@@ -24,12 +24,12 @@ SECTIONS
 		*(.init_pgdir)
 	} > ram
 
-	.common-data ALIGN(1024)	:
+	.common-data ALIGN(4096)	:
 	{
 		*(.common-data)
 	} > ram
 
-	.data ALIGN(1024)	:
+	.data ALIGN(4096)	:
 	{
 		_data_start	= .;
 		*(.data)
