@@ -77,8 +77,8 @@ clean:
 
 dt.img:	boot.bin kinit.bin kernel.bin
 	objcopy -I binary -O binary --gap-fill 0 --pad-to $(KINIT_START) boot.bin 1.bin
-	cmd /c"copy /b 1.bin + /b kinit.bin 2.bin /b"
+	cat 1.bin kinit.bin > 2.bin
 	objcopy -I binary -O binary --gap-fill 0 --pad-to $(KERNEL_START) 2.bin 3.bin
-	cmd /c"copy /b 3.bin + /b kernel.bin 4.bin /b"
+	cat 3.bin kernel.bin > 4.bin
 	objcopy -I binary -O binary --gap-fill 0 --pad-to $(IMAGE_SIZE) 4.bin $@
 
