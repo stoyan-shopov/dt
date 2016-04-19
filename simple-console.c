@@ -310,9 +310,15 @@ int i, j;
 	return 0;
 }
 
-static int handle_shift(void)
+static int handle_shift_pressed(void)
 {
-	console_state.shift_active ^= 1;
+	console_state.shift_active = 1;
+	return 0;
+}
+
+static int handle_shift_released(void)
+{
+	console_state.shift_active = 0;
 	return 0;
 }
 
@@ -415,8 +421,8 @@ translation_table[256] =
 	[0x39]	=	{ 	' ', ' ', 0, },
 	[0x0e]	=	{ 	0, 0, handle_backspace, },
 	[0x1c]	=	{ 	0, 0, handle_enter, },
-	[0x2a]	=	{ 	0, 0, handle_shift, handle_shift, },
-	[0x36]	=	{ 	0, 0, handle_shift, handle_shift, },
+	[0x2a]	=	{ 	0, 0, handle_shift_pressed, handle_shift_released, },
+	[0x36]	=	{ 	0, 0, handle_shift_pressed, handle_shift_released, },
 	[0x1d]	=	{ 	0, 0, handle_control, handle_control, },
 	
 };
