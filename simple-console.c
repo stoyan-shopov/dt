@@ -27,6 +27,7 @@ static struct
 {
 	unsigned	shift_active	: 1;
 	unsigned	control_active	: 1;
+	unsigned	alt_active	: 1;
 }
 console_state =
 {
@@ -322,6 +323,18 @@ static int handle_shift_released(void)
 	return 0;
 }
 
+static int handle_alt_pressed(void)
+{
+	console_state.alt_active = 1;
+	return 0;
+}
+
+static int handle_alt_released(void)
+{
+	console_state.alt_active = 0;
+	return 0;
+}
+
 static int handle_control(void)
 {
 	console_state.control_active ^= 1;
@@ -419,6 +432,7 @@ translation_table[256] =
 
 
 	[0x39]	=	{ 	' ', ' ', 0, },
+	[0x38]	=	{ 	0, 0, handle_alt_pressed, handle_alt_released, },
 	[0x0e]	=	{ 	0, 0, handle_backspace, },
 	[0x1c]	=	{ 	0, 0, handle_enter, },
 	[0x2a]	=	{ 	0, 0, handle_shift_pressed, handle_shift_released, },
