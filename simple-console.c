@@ -291,7 +291,7 @@ int i, j;
 
 
 
-static int handle_backspace(void)
+static int handle_backspace(int scancode)
 {
 int i, j;
 
@@ -311,31 +311,31 @@ int i, j;
 	return 0;
 }
 
-static int handle_shift_pressed(void)
+static int handle_shift_pressed(int scancode)
 {
 	console_state.shift_active = 1;
 	return 0;
 }
 
-static int handle_shift_released(void)
+static int handle_shift_released(int scancode)
 {
 	console_state.shift_active = 0;
 	return 0;
 }
 
-static int handle_alt_pressed(void)
+static int handle_alt_pressed(int scancode)
 {
 	console_state.alt_active = 1;
 	return 0;
 }
 
-static int handle_alt_released(void)
+static int handle_alt_released(int scancode)
 {
 	console_state.alt_active = 0;
 	return 0;
 }
 
-static int handle_control(void)
+static int handle_control(int scancode)
 {
 	console_state.control_active ^= 1;
 	do_console_cleanup();
@@ -361,7 +361,7 @@ int i;
 	do_draw_cursor();
 }
 
-static int handle_enter(void)
+static int handle_enter(int scancode)
 {
 int i;
 
@@ -373,12 +373,19 @@ int i;
 	return 0;
 }
 
+static int handle_fn_keys(int scancode)
+{
+	if (console_state.alt_active)
+		console_ring_buffer_try_push(scancode - 0x3a);
+	return 0;
+}
+
 static const struct keyboard_scancode_entry
 {
 	uint8_t sym;
 	uint8_t shift_sym;
-	int (* make_handler)(void);
-	int (* break_handler)(void);
+	int (* make_handler)(int scancode);
+	int (* break_handler)(int scancode);
 }
 translation_table[256] =
 {
@@ -430,6 +437,8 @@ translation_table[256] =
 	[0x34]	=	{ 	'.', '>', 0, },
 	[0x35]	=	{ 	'/', '?', 0, },
 
+	[0x3b]	=	{ 	0, 0, handle_fn_keys, },
+	[0x3c]	=	{ 	0, 0, handle_fn_keys, },
 
 	[0x39]	=	{ 	' ', ' ', 0, },
 	[0x38]	=	{ 	0, 0, handle_alt_pressed, handle_alt_released, },
@@ -469,7 +478,7 @@ struct keyboard_scancode_entry e;
 	{
 		/* make code */
 		if (e.make_handler)
-			c = e.make_handler();
+			c = e.make_handler(scancode);
 		else
 			c = console_state.shift_active ? e.shift_sym : e.sym;
 		if (c)
@@ -479,7 +488,7 @@ struct keyboard_scancode_entry e;
 	{
 		/* break code */
 		if (e.break_handler)
-			c = e.break_handler();
+			c = e.break_handler(scancode);
 	}
 	return c ? c : '?';
 }
