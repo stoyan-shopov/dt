@@ -27,9 +27,7 @@ extern int _data_start;
 void fork(void)
 {
 	xmemcpy((void *) ((unsigned) & _data_start + 0x100000), & _data_start, 0x200000 - (unsigned) & _data_start);
-	if (!setjmp(context_1))
-		;//xmemcpy(context_1, context_0, sizeof context_0);
-	else
+	if (setjmp(kernel_proces_contexts[1]))
 	{
 		do_console_refresh();
 		* (unsigned char *) 0xb8002 = '!';

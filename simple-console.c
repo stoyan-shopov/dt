@@ -20,6 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include <stdbool.h>
+#include "constants.h"
 #include "simple-console.h"
 #include "common-data.h"
 
@@ -29,7 +30,7 @@ static struct
 	unsigned	control_active	: 1;
 	unsigned	alt_active	: 1;
 }
-console_state =
+console_state __attribute__((section(".common-data"))) =
 {
 	.shift_active	= 0,
 };
@@ -532,6 +533,13 @@ static const char cmd[] = "12 12 * . cr .( hello, world!) cr";
 
 int user_getchar(void)
 {
-	return console_ring_buffer_pull();
+int c = console_ring_buffer_pull();
+
+	while (0 < c && c <= NUMBER_OF_KERNEL_PROCESSES)
+	{
+		switch_task(c - 1);
+		c = console_ring_buffer_pull();
+	}
+	return c;
 }
 

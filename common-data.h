@@ -21,9 +21,10 @@ THE SOFTWARE.
 */
 
 #include "simple-console.h"
+#include "constants.h"
 #include "setjmp.h"
 
-extern jmp_buf context_0, context_1;
+extern jmp_buf kernel_proces_contexts[NUMBER_OF_KERNEL_PROCESSES];
 extern int active_process;
 
 extern struct video_console video_console_primary;

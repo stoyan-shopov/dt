@@ -130,8 +130,6 @@ static void do_bss_end(void) { sf_push(& _bss_end); }
 extern void do_dump_mouse_bytes(void);
 void do_console_refresh(void);
 
-extern void next_task();
-
 static struct word dict_base_dummy_word[1] = { MKWORD(0, 0, 0, "", 0), };
 static const struct word custom_dict[] = {
 	MKWORD(dict_base_dummy_word,	0,	"bit",	do_bit),
@@ -150,7 +148,6 @@ static const struct word custom_dict[] = {
 	MKWORD(custom_dict,	__COUNTER__,	"bss-end",	do_bss_end),
 	MKWORD(custom_dict,	__COUNTER__,	"console-refresh",	do_console_refresh),
 
-	MKWORD(custom_dict,	__COUNTER__,	"next-task",	next_task),
 }, * custom_dict_start = custom_dict + __COUNTER__;
 
 static void sf_dict_init(void) __attribute__((constructor));

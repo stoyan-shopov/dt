@@ -22,8 +22,7 @@ THE SOFTWARE.
 
 #include "common-data.h"
 
-jmp_buf context_0 __attribute__((section(".common-data")));
-jmp_buf context_1 __attribute__((section(".common-data")));
+jmp_buf kernel_proces_contexts[NUMBER_OF_KERNEL_PROCESSES] __attribute__((section(".common-data")));
 
 int active_process __attribute__((section(".common-data")));
 

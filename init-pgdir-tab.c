@@ -66,21 +66,24 @@ void enable_paging(void)
 	enable_paging_low(& init_pgdir_tab);
 }
 
-void next_task(void)
+void switch_task(int task_number)
 {
 extern char _data_start;
-	if (!setjmp(active_process ? context_1 : context_0))
+	if (active_process == task_number)
+		return;
+	if (!setjmp(kernel_proces_contexts[active_process]))
 	{
-		active_process ^= 1;
+		active_process = task_number;
 		next_task_low(
-				init_pgdir_tab.pgtab + ((unsigned) & _data_start >> 12),		/* address of first page table entry to adjust */
-				((active_process ? 0x100000 : 0) + ((unsigned) & _data_start)) >> 12,	/* starting physical page number of the adjustment */
-				(0x200000 - (unsigned) & _data_start) >> 12,				/* number of page table entries to adjust */
-				active_process ? context_1 : context_0					/* jump buffer address to use for longjmp */
+				init_pgdir_tab.pgtab + ((unsigned) & _data_start >> 12),	/* address of first page table entry to adjust */
+				((active_process << 20) + ((unsigned) & _data_start)) >> 12,	/* starting physical page number of the adjustment */
+				(0x200000 - (unsigned) & _data_start) >> 12,			/* number of page table entries to adjust */
+				kernel_proces_contexts[active_process]				/* jump buffer address to use for longjmp */
 			);
 
 	}
 	else
 		do_console_refresh();
 }
+
 

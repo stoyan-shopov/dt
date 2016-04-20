@@ -69,12 +69,7 @@ $b8000 constant vmem-base
 	;
 
 .( use 'dl' to dump the lower half of the disk buffer, 'dh', for the second one)cr
-
 cr
-
-: nt ( --) next-task ;
-.( use 'nt' as a shortcut to 'next-task')cr
-
 .( the arena currently occupies ) here swap - decimal . .( bytes) cr cr
 
 base !
