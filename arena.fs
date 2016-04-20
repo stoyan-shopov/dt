@@ -73,3 +73,5 @@ cr
 .( the arena currently occupies ) here swap - decimal . .( bytes) cr cr
 
 base !
+
+.( this is console number ) active-process . cr

@@ -24,6 +24,8 @@ THE SOFTWARE.
 #include <engine.h>
 #include <sf-word-wizard.h>
 
+#include "common-data.h"
+
 /*
  *
  * local function prototypes
@@ -130,6 +132,8 @@ static void do_bss_end(void) { sf_push(& _bss_end); }
 extern void do_dump_mouse_bytes(void);
 void do_console_refresh(void);
 
+static void do_active_process(void) { sf_push(active_process); }
+
 static struct word dict_base_dummy_word[1] = { MKWORD(0, 0, 0, "", 0), };
 static const struct word custom_dict[] = {
 	MKWORD(dict_base_dummy_word,	0,	"bit",	do_bit),
@@ -147,6 +151,7 @@ static const struct word custom_dict[] = {
 	MKWORD(custom_dict,	__COUNTER__,	"bss-start",	do_bss_start),
 	MKWORD(custom_dict,	__COUNTER__,	"bss-end",	do_bss_end),
 	MKWORD(custom_dict,	__COUNTER__,	"console-refresh",	do_console_refresh),
+	MKWORD(custom_dict,	__COUNTER__,	"active-process",	do_active_process),
 
 }, * custom_dict_start = custom_dict + __COUNTER__;
 
