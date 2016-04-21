@@ -47,8 +47,8 @@ THE SOFTWARE.
 kernel_entry_point:
 	/* copy any stack parameters, and relocate the stack */
 	/* assumed is that the top of the stack is set up at this location */
-	call	enable_gate_a20
 	movl	$.,	%ecx
+	call	enable_gate_a20
 	movl	%ecx,	%esi
 	decl	%esi
 	subl	%esp,	%ecx
