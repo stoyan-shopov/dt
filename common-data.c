@@ -22,8 +22,5 @@ THE SOFTWARE.
 
 #include "common-data.h"
 
-jmp_buf kernel_proces_contexts[NUMBER_OF_KERNEL_PROCESSES] __attribute__((section(".common-data")));
-
+jmp_buf kernel_process_contexts[NUMBER_OF_KERNEL_PROCESSES] __attribute__((section(".common-data")));
 int active_process __attribute__((section(".common-data")));
-
-struct video_console video_console_primary;

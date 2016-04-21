@@ -26,11 +26,17 @@ extern int _data_start;
 
 void fork(void)
 {
-	xmemcpy((void *) ((unsigned) & _data_start + 0x100000), & _data_start, 0x200000 - (unsigned) & _data_start);
-	if (setjmp(kernel_proces_contexts[1]))
+int i;
+	if (NUMBER_OF_KERNEL_PROCESSES < 2)
+		return;
+	for (i = 1; i < NUMBER_OF_KERNEL_PROCESSES; i ++)
+		xmemcpy((void *) ((unsigned) & _data_start + (i  << 20)), & _data_start, 0x200000 - (unsigned) & _data_start);
+	if (setjmp(kernel_process_contexts[1]))
 	{
 		do_console_refresh();
 		* (unsigned char *) 0xb8002 = '!';
 	}
+	else
+		for (i = 2; i < NUMBER_OF_KERNEL_PROCESSES; * kernel_process_contexts[i ++] = * kernel_process_contexts[1]);
 }
 
