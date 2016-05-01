@@ -59,7 +59,7 @@ boot.bin: boot
 	
 
 kernel.bin: kernel
-	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
+	objcopy -O binary -R .init-pgdir-tab $<$(EXECUTABLE_EXTENSION) $@
 kernel: $(KOBJECTS) $(SFORTH_OBJECTS)
 	$(CC) -v -m32 -o $@ -T kernel.ld -nostdlib $^ -fno-exceptions -static -lgcc
 

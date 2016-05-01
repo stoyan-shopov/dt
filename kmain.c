@@ -65,7 +65,8 @@ uint32_t x;
 int i;
 unsigned char * bss, * data_src, * data_dest;
 extern void (* const _init_startup) (void), (* const _init_startup_end) (void);
-extern char _data_start, _data_end, _idata_contents_start;
+extern char _common_data_start, _common_data_end, _common_data_contents_start;
+extern char _data_start, _data_end;
 extern unsigned int _bss_start, _bss_end;
 void (* const * finit) (void);
 
@@ -75,9 +76,14 @@ void (* const * finit) (void);
 	while (i --)
 		* bss ++ = 0;
 
+	i = (unsigned int) & _common_data_end - (unsigned int) & _common_data_start;
+	data_src = & _common_data_contents_start;
+	data_dest = & _common_data_start;
+	while (i --)
+		* data_dest ++ = * data_src ++;
+
 	* (unsigned char *) 0xb8002 = 'B';
 	i = (unsigned int) & _data_end - (unsigned int) & _data_start;
-	data_src = & _idata_contents_start;
 	data_dest = & _data_start;
 	while (i --)
 		* data_dest ++ = * data_src ++;

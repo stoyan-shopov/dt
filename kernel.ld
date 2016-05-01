@@ -16,7 +16,7 @@ SECTIONS
 	.x86_idt ALIGN(8)	: { *(.x86_idt) } > rom
 	.rodata ALIGN(8)	: {
 		*(.rodata)
-		_idata_contents_start	= .;
+		_common_data_contents_start	= .;
 	} > rom
 
 	.init-pgdir-tab :
@@ -26,8 +26,10 @@ SECTIONS
 
 	.common-data ALIGN(4096)	:
 	{
+		_common_data_start	= .;
 		*(.common-data)
-	} > ram
+		_common_data_end	= .;
+	} > ram AT> rom
 
 	.data ALIGN(4096)	:
 	{
