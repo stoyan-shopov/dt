@@ -30,7 +30,7 @@ static struct
 	struct pgde pgdir[1024];
 	struct pgte pgtab[(NUMBER_OF_KERNEL_PROCESSES >> 2) + /* always have at least one page table */ 1][1024];
 }
-init_pgdir_tab __attribute__((section(".init_pgdir")));
+init_pgdir_tab __attribute__((section(".init-pgdir")));
 
 void populate_initial_page_directory(void)
 {

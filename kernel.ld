@@ -19,9 +19,9 @@ SECTIONS
 		_idata_contents_start	= .;
 	} > rom
 
-	.init_pgdir_tab :
+	.init-pgdir-tab :
 	{
-		*(.init_pgdir)
+		*(.init-pgdir)
 	} > ram
 
 	.common-data ALIGN(4096)	:
