@@ -23,14 +23,18 @@ cr .( welcome to the death track sforth arena) cr
 .( remember to regularly clean the arena when you are done hacking on something) cr
 .( the arena is your friend; be nice and treat it friendly) cr
 
-variable buf 512 allot
+\ align 'buf' on a 16 byte boundary, for prettier dumps
+16 here 15 and - 15 and allot
+here 512 allot constant buf
+
 : id ( -- t=success|f=failure) buf ata-identify-drive if
 	." drive identified successfully" else ." COULD NOT IDENTIFY DRIVE" then cr ;
-: rs ( buffer sector -- t=success|f=failure) buf swap ata-28lba-read-sector if
+: rs ( sector-number -- t=success|f=failure) buf swap ata-28lba-read-sector if
 	." sector read successfully" else ." COULD NOT READ SECTOR" then cr ;
+: ws ( sector-number -- t=success|f=failure) buf swap ata-28lba-write-sector if
+	." sector written successfully" else ." COULD NOT WRITE SECTOR" then cr ;
 
-: dl buf 256 dump ;
-: dh buf 256 + 256 dump ;
+: ds buf 512 dump ;
 
 \ video memory base address
 $b8000 constant vmem-base
@@ -68,7 +72,7 @@ $b8000 constant vmem-base
 	loop
 	;
 
-.( use 'dl' to dump the lower half of the disk buffer, 'dh', for the second one)cr
+.( use 'ds' to dump the disk buffer)cr
 cr
 .( the arena currently occupies ) here swap - decimal . .( bytes) cr cr
 

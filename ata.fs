@@ -44,6 +44,8 @@ $3f6 value DEVICE-CONTROL-REGISTER
 \ write these to the COMMAND-PORT
 $ec constant ATA-COMMAND-IDENTIFY
 $20 constant ATA-COMMAND-READ-SECTORS
+$30 constant ATA-COMMAND-WRITE-SECTORS
+$e7 constant ATA-COMMAND-CACHE-FLUSH
 
 : DATA-PORT ( -- port-number)
 	ATA-PORT-BASE 0 + ;
@@ -105,6 +107,13 @@ $20 constant ATA-COMMAND-READ-SECTORS
 	loop drop
 	;
 
+: ata-write-data-words ( data-buffer word-count -- )
+	0 do
+		count swap count 8 lshift rot or
+		DATA-PORT outpw
+	loop drop
+	;
+
 : ata-identify-drive ( data-buffer -- t=success|f=error)
 	\ todo: make sure what the $a0 below really does...
 	$a0 DRIVE-HEAD-PORT outpb
@@ -126,6 +135,22 @@ $20 constant ATA-COMMAND-READ-SECTORS
 	ATA-SECTOR-BYTESIZE ATA-WORD-BYTESIZE / ata-read-data-words
 	true
 	;
+
+: ata-28lba-write-sector ( data-buffer lba-sector-nr -- t=success|f=error)
+	\ todo: make sure what the $e0 below really does...
+	$e0 over 24 rshift $f and or DRIVE-HEAD-PORT outpb
+	1 SECTOR-COUNT-PORT outpb
+	ata-select-lba
+	ATA-COMMAND-WRITE-SECTORS COMMAND-PORT outpb
+	ata-wait-device-ready false = if ." device error" cr drop false exit then
+	." writing data..." cr
+	ATA-SECTOR-BYTESIZE ATA-WORD-BYTESIZE / ata-write-data-words
+	\ send an ata 'cache flush' command
+	\ todo: check if this is correct (i don't have documentation and network access now)
+	ATA-COMMAND-CACHE-FLUSH COMMAND-PORT outpb
+	true
+	;
+
 .( selecting first master ata drive) cr
 $e0 DRIVE-HEAD-PORT outpb
 .( drive status: $) base @ hex STATUS-PORT inpb . base ! cr
