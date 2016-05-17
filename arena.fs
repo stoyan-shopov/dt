@@ -30,11 +30,11 @@ cr .( welcome to the death track sforth arena) cr
 16 here 15 and - 15 and allot
 here 512 allot constant buf
 
-: id ( -- t=success|f=failure) buf ata-identify-drive if
+: id ( -- t=success|f=failure) buf ata-identify-drive dup if
 	." drive identified successfully" else ." COULD NOT IDENTIFY DRIVE" then cr ;
-: rs ( sector-number -- t=success|f=failure) buf swap ata-28lba-read-sector if
+: rs ( sector-number -- t=success|f=failure) buf swap ata-28lba-read-sector dup if
 	." sector read successfully" else ." COULD NOT READ SECTOR" then cr ;
-: ws ( sector-number -- t=success|f=failure) buf swap ata-28lba-write-sector if
+: ws ( sector-number -- t=success|f=failure) buf swap ata-28lba-write-sector dup if
 	." sector written successfully" else ." COULD NOT WRITE SECTOR" then cr ;
 
 : ds buf 512 dump ;
