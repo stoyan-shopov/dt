@@ -12,7 +12,7 @@ KOBJECTS = klow.o kmain.o idt.o simple-console.o setjmp.o dictionary-ext.o \
 	   fork.o
 
 SFORTH_OBJECTS = sforth/engine.o sf-arch.o sforth/sf-opt-file.o sforth/sf-opt-string.o sforth/sf-opt-prog-tools.o
-SFORTH_ESCAPED_CODE_FILES = arena.efs pci.efs init.efs ata.efs
+SFORTH_ESCAPED_CODE_FILES = arena.efs pci.efs init.efs ata.efs disk.efs fs-fat.efs
 # the start at the floppy image of the low-level kernel initialization code
 #KINIT_START = 16384
 # samsung nc110 flash drive

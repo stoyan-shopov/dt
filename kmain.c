@@ -32,6 +32,8 @@ static uint8_t INITIAL_DT_SFORTH_CODE[] =
 #include "pci.efs"
 #include "ata.efs"
 #include "arena.efs"
+#include "disk.efs"
+#include "fs-fat.efs"
 " cr .( modules loaded) cr "
 //" source type "
 };
