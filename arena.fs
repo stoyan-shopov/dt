@@ -23,6 +23,9 @@ cr .( welcome to the death track sforth arena) cr
 .( remember to regularly clean the arena when you are done hacking on something) cr
 .( the arena is your friend; be nice and treat it friendly) cr
 
+: hw@ ( address -- halfword)
+	@ $ffff and ;
+
 \ align 'buf' on a 16 byte boundary, for prettier dumps
 16 here 15 and - 15 and allot
 here 512 allot constant buf
