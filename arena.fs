@@ -23,6 +23,42 @@ cr .( welcome to the death track sforth arena) cr
 .( remember to regularly clean the arena when you are done hacking on something) cr
 .( the arena is your friend; be nice and treat it friendly) cr
 
+\ some optional 'facility' words for working with data structures
+\ todo : maybe move these to the sforth engine
+
+
+: begin-structure ( 'name' -- xxx )
+	create here ( allocate space for size) 0 , ( initialize field offset) 0
+	does> ( allocate and initialize space for the data structure)
+		." creating structure definition"cr create @ here over allot 0 rot fill
+	;
+: +field ( xxx -- xxx )
+	create over , + does> @ +
+	;
+: field: ( xxx -- xxx )
+	aligned 1 cells +field
+	;
+: cfield ( xxx -- xxx )
+	1 chars +field
+	;
+: end-structure ( xxx --)
+	( store data structure size) swap !
+	;
+\ data structure operation test drive
+begin-structure struct
+	cfield		.a
+	2 +field	.b
+	field:		.c
+end-structure
+struct str
+: struct-testdrive
+	 .( run 'struct-testdrive' for data structure operation test drive)[ cr ]
+		s" struct str-td str-td str-td .a str-td .b str-td .c .s abort"
+		evaluate
+	;
+
+
+
 : hw@ ( address -- halfword)
 	@ $ffff and ;
 
