@@ -15,7 +15,7 @@ marker discard
 			." starting sector: " buf over + 8 + @ .
 			." ; total sectors: " buf over + 12 + @ dup .
 			." ("
-			512 * 1024 1024 * / . ." MB)"cr
+			512 * 1024 1024 * / u. ." MB)"cr
 		then
 		16 +
 	loop drop
