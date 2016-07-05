@@ -31,7 +31,7 @@ KERNEL_START = 36864
 IMAGE_SIZE = 1474560
 EXECUTABLE_EXTENSION=
 
-all: clean $(SFORTH_ESCAPED_CODE_FILES) dt.img
+all: clean utils $(SFORTH_ESCAPED_CODE_FILES) dt.img
 
 debug:
 	virtualbox --startvm dt --debug-command-line
@@ -51,6 +51,10 @@ dumps:
 
 %.efs: %.fs
 	./stresc < $^ > $@
+utils: stresc
+
+stresc: utils/stresc.c
+	gcc -o $@ $<
 
 boot.bin: boot
 	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
