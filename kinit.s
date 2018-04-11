@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2016 stoyan shopov
+Copyright (c) 2014-2016, 2018 stoyan shopov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-PHYSICAL_KERNEL_BASE_ADDRESS	= 0x50000
-PHYSICAL_KERNEL_TOP_ADDRESS	= 0xa0000
-PHYSICAL_KINIT_BASE	= PHYSICAL_KERNEL_BASE_ADDRESS - 0x8000
+
+.include "constants.s"
 
 .text
 .code16
@@ -34,9 +33,9 @@ entry_point:
 	jmp	load_kernel_proper
 
 .align 8
-/* define the global descriptor table */
+/* define the protected mode global descriptor table */
 gdt:
-.code32
+# .code32
 /* the null entry */
 .long	0
 .long	0
@@ -47,15 +46,39 @@ gdt:
 .long	0x0000ffff
 .long	0x00cf9a00
 gdt_end:
-.code16
+#.code16
 .align 2
 gdtr_value:
 /* gdt limit */
 .word	gdt_end - gdt - 1
-.code32
+
+#.code32
 /* gdt physical base address */
-.long	gdt + PHYSICAL_KINIT_BASE
-.code16
+.long	gdt + KINIT_PHYSICAL_BASE_ADDRESS
+#.code16
+
+
+.align 8
+/* define the unreal mode global descriptor table */
+unreal_gdt:
+# .code32
+/* the null entry */
+.long	0
+.long	0
+/* data segment descriptor - base 0, limit 4 GB, read-write */
+.long	0x0000ffff
+.long	0x00cf9200
+unreal_gdt_end:
+#.code16
+.align 2
+unreal_gdtr_value:
+/* gdt limit */
+.word	unreal_gdt_end - unreal_gdt - 1
+
+#.code32
+/* gdt physical base address */
+.long	unreal_gdt + KINIT_PHYSICAL_BASE_ADDRESS
+#.code16
 
 
 .align	4
@@ -169,7 +192,7 @@ c_drive:
 // current segment that is being filled from disk; must be
 // at a base adddress which is an integral multiple of 64 kilobytes
 c_segment:
-.word	PHYSICAL_KERNEL_BASE_ADDRESS >> 4
+.word	KERNEL_PHYSICAL_BASE_ADDRESS >> 4
 // current offset in the current segment; must be an integral multiple of the sector size
 c_offset:
 .word	0
@@ -257,7 +280,7 @@ bios_read_sectors:
 load_image:
 	/* %ax - number of sectors to load; the current sector, head, track, load segment base and ofsset
 	 * and remaining sectors counts must have been initialized prior to invoking this code
-	 * on error, return with burden set */
+	 * on error, return with carry flag set */
 	pushw	%ax
 	movw	%sp,	%bp
 2:
@@ -306,6 +329,42 @@ force_load_kernel:	.word	0
 .align	4
 load_kernel_proper:
 
+enter_unreal_mode:
+	cli
+	/* load unreal global descriptor table register */
+	lgdt	%cs:unreal_gdtr_value
+	/* enable protection */
+	movl	%cr0,	%eax
+	orb	$1,	%al
+	movl	%eax,	%cr0
+	/* serialize processor core - is this really needed? */
+	jmp	1f
+1:
+	/* update segment registers limit values, but do not touch the code segment (cs) register */
+	movl	$8,	%bx
+	movl	%bx,	%ds
+	movl	%bx,	%es
+	movl	%bx,	%ss
+	/* disable protection, and enter big unreal mode */
+	andb	$0xfe,	%al
+	movl	%eax,	%cr0
+	/* serialize processor core - is this really needed? */
+	jmp	1f
+1:
+	xorw	%ax,	%ax
+	movw	%ax,	%ds
+	movl	$0xb8000,	%eax
+
+	movb	$'U',	(%eax)
+	jmp	.
+
+
+	movw	$VIDEO_SEG_BASE,	%ax
+	movw	%ax,	%ds
+	movb	$'{',	%al
+	movb	%al,	0
+	jmp	.
+
 	pushw	%cs
 	popw	%ds
 	/* the kernel loader is meant to be entered via a far call, so that it can be entered from a dos loader, as well as from a generic bootloader */
@@ -333,7 +392,7 @@ load_kernel_proper:
 2:
 	cmpw	$0,	force_load_kernel
 	je	2f
-	movw	$((PHYSICAL_KERNEL_TOP_ADDRESS - PHYSICAL_KERNEL_BASE_ADDRESS) / SECTOR_SIZE),	%ax
+	movw	$((KERNEL_PHYSICAL_TOP_ADDRESS - KERNEL_PHYSICAL_BASE_ADDRESS) / SECTOR_SIZE),	%ax
 	call	load_image
 
 	movw	$0xb800,	%ax
@@ -356,18 +415,19 @@ enter_protected_mode:
 	orw	$1,	%ax
 	movl	%eax,	%cr0
 
-	jmpl	$0x10, $1f + PHYSICAL_KINIT_BASE
+	jmpl	$0x10, $1f + KINIT_PHYSICAL_BASE_ADDRESS
 1:
+
 .code32
 	movw	$0x8,	%ax
 	movw	%ax,	%ds
 	movw	%ax,	%es
 	movw	%ax,	%ss
-	movl	$PHYSICAL_KERNEL_BASE_ADDRESS,	%esp
+	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%esp
 	movb	$'Q',	0xb8000
-	movl	(display_image_and_halt + PHYSICAL_KINIT_BASE),	%eax
+	movl	(display_image_and_halt + KINIT_PHYSICAL_BASE_ADDRESS),	%eax
 	pushl	%eax
-	movl	$PHYSICAL_KERNEL_BASE_ADDRESS,	%eax
+	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%eax
 	call	*%eax
 	jmp	.
 

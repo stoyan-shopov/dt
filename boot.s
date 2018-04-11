@@ -20,12 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-PHYSICAL_KERNEL_BASE_ADDRESS	= 0x50000
-PHYSICAL_KINIT_BASE	= PHYSICAL_KERNEL_BASE_ADDRESS - 0x8000
+
+.include "constants.s"
 
 BIOS_BOOT_SEG_BASE		=	0x7c0
-VIDEO_SEG_BASE			=	0xb800
-STACK_BASE			=	0x400
+STACK_BASE			=	0x600
 
 .text
 .code16
@@ -179,7 +178,7 @@ start:
 	//int	$0x16
 
 	/* read and jump to the death track kernel */
-	movw	$(PHYSICAL_KINIT_BASE >> 4),	%ax
+	movw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4),	%ax
 	movw	%ax,	%es
 	/* load sectors per track count */
 	popw	%ax
@@ -218,7 +217,7 @@ start:
 	callw	print_msg
 	jmp	.
 2:
-	movw	$(PHYSICAL_KINIT_BASE >> 4),	%ax
+	movw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4),	%ax
 	movw	%ax,	%ds
 1:
 	xorw	%si,	%si
@@ -243,7 +242,7 @@ start:
 	movb	$'?',	0
 	pushw	$0	/* do not display image */
 	pushw	$1	/* force kernel loading */
-	callw	$(PHYSICAL_KINIT_BASE >> 4), $0
+	callw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4), $0
 	jmp	.
 
 	/* read sectors */
