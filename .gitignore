@@ -1,0 +1,9 @@
+*.o
+*.bin
+*.efs
+*.img
+*.exe
+*.swp
+boot
+kernel
+kinit
