@@ -189,21 +189,15 @@ track_cnt:
 c_drive:
 .word	0
 
-// current segment that is being filled from disk; must be
-// at a base adddress which is an integral multiple of 64 kilobytes
+// current segment that is being filled from disk
 c_segment:
-.word	KERNEL_PHYSICAL_BASE_ADDRESS >> 4
-// current offset in the current segment; must be an integral multiple of the sector size
-c_offset:
 .word	0
+// current offset in the current segment
+c_offset:
+.word	disk_buffer
 
-SECTOR_SIZE		=	512
 SEGMENT_INCREMENT	=	0x1000
-SECTORS_PER_SEGMENT	=	0x10000 / SECTOR_SIZE
-
-// remaining sectors in the current segment
-sectors_remaining:
-.word	SECTORS_PER_SEGMENT
+SECTORS_PER_SEGMENT	=	0x10000 / DISK_SECTOR_SIZE
 
 /*
 : advance-head ( --)
@@ -231,12 +225,6 @@ advance_head:
 	." advancing segment to $" base @ hex c-segment @ . cr base !
 	;
 */
-advance_segment:
-	addw	$SEGMENT_INCREMENT,	c_segment
-	movw	$0,	c_offset
-	movw	$SECTORS_PER_SEGMENT,	sectors_remaining
-	ret
-
 bios_read_sectors:
 	/* %ax - sector count
 	 * on return - carry is set if an error occurred */
@@ -277,7 +265,7 @@ bios_read_sectors:
 	repeat drop true
 	;
 */
-load_image:
+read_sectors:
 	/* %ax - number of sectors to load; the current sector, head, track, load segment base and ofsset
 	 * and remaining sectors counts must have been initialized prior to invoking this code
 	 * on error, return with carry flag set */
@@ -287,9 +275,9 @@ load_image:
 	movw	sectors_per_track,	%ax
 	subw	c_sector,	%ax
 	incw	%ax
-	cmpw	sectors_remaining,	%ax
-	jb	1f
-	movw	sectors_remaining,	%ax
+	cmpw	%ax,		0(%bp)
+	jae	1f
+	movw	0(%bp),		%ax
 1:
 	pushw	%ax
 	call	bios_read_sectors
@@ -303,20 +291,12 @@ load_image:
 	/* retrieve sector count */
 	popw	%ax
 	addw	%ax,	c_sector
-	subw	%ax,	sectors_remaining
 	subw	%ax,	(%bp)
-
-	shlw	$9,	%ax
-	addw	%ax,	c_offset
 
 	movw	c_sector,	%ax
 	cmpw	%ax,	sectors_per_track
 	jae	1f
 	call	advance_head
-1:
-	cmp	$0,	sectors_remaining
-	jne	1f
-	call	advance_segment
 1:
 	cmp	$0,	(%bp)
 	jg	2b
@@ -326,8 +306,16 @@ load_image:
 
 display_image_and_halt:	.long	0
 force_load_kernel:	.word	0
+
 .align	4
+
 load_kernel_proper:
+
+enable_gate_a20:
+
+	inb	$0x92,		%al
+	orb	$2,		%al
+	outb	%al,		$0x92
 
 enter_unreal_mode:
 	cli
@@ -341,32 +329,20 @@ enter_unreal_mode:
 	jmp	1f
 1:
 	/* update segment registers limit values, but do not touch the code segment (cs) register */
-	movl	$8,	%bx
-	movl	%bx,	%ds
-	movl	%bx,	%es
-	movl	%bx,	%ss
+	movw	$8,	%bx
+	movw	%bx,	%ds
+	movw	%bx,	%es
 	/* disable protection, and enter big unreal mode */
 	andb	$0xfe,	%al
 	movl	%eax,	%cr0
 	/* serialize processor core - is this really needed? */
 	jmp	1f
 1:
-	xorw	%ax,	%ax
-	movw	%ax,	%ds
-	movl	$0xb8000,	%eax
-
-	movb	$'U',	(%eax)
-	jmp	.
-
-
-	movw	$VIDEO_SEG_BASE,	%ax
-	movw	%ax,	%ds
-	movb	$'{',	%al
-	movb	%al,	0
-	jmp	.
 
 	pushw	%cs
-	popw	%ds
+	popw	%ax
+	movw	%ax,	%ds
+	movw	%ax,	c_segment
 	/* the kernel loader is meant to be entered via a far call, so that it can be entered from a dos loader, as well as from a generic bootloader */
 	/* discard return address */
 	popw	%ax
@@ -391,20 +367,56 @@ enter_unreal_mode:
 	int	$0x10
 2:
 	cmpw	$0,	force_load_kernel
-	je	2f
-	movw	$((KERNEL_PHYSICAL_TOP_ADDRESS - KERNEL_PHYSICAL_BASE_ADDRESS) / SECTOR_SIZE),	%ax
-	call	load_image
+	je	3f
 
-	movw	$0xb800,	%ax
+	movl	disk_buffer,	%esi
+	xorl	%eax,	%eax
+	movw	%ds,	%ax
+	shll	$4,	%eax
+	addl	$disk_buffer,	%eax
+	movl	%eax,	source_for_kernel_binary
+
+	movw	$((KERNEL_PHYSICAL_TOP_ADDRESS - KERNEL_PHYSICAL_BASE_ADDRESS) / DISK_SECTOR_SIZE),	%cx
+	cld
+
+load_kernel_from_disk:
+
+	pushw	%cx
+	movw	$1,	%ax
+	call	read_sectors
+	jnc	1f
+
+	popw	%cx
+	jmp	2f
+1:	
+	movl	source_for_kernel_binary,	%esi
+	movl	destination_for_kernel_binary,	%edi
+	xorw	%ax,	%ax
 	movw	%ax,	%ds
+	movw	%ax,	%es
+
+	movw	$DISK_SECTOR_SIZE,	%cx
+	rep	movsb		%ds:(%esi),	%es:(%edi)
+
+	pushw	%cs
+	popw	%ds
+	movl	%edi,	destination_for_kernel_binary
+
+	popw	%cx
+
+	loop	load_kernel_from_disk
+	clc
+2:	
+	movw	$0xb800,	%ax
+	movw	%ax,		%ds
 
 	jb	1f
 
 	movb	$'+',	0
-	jmp	2f
+	jmp	3f
 1:
 	movb	$'-',	0
-2:
+3:
 
 enter_protected_mode:
 	cli
@@ -428,6 +440,18 @@ enter_protected_mode:
 	movl	(display_image_and_halt + KINIT_PHYSICAL_BASE_ADDRESS),	%eax
 	pushl	%eax
 	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%eax
+
+	xorl	%ecx,	%ecx
+	jcxz	.
+
 	call	*%eax
 	jmp	.
 
+.align 4	
+source_for_kernel_binary:
+.long	0
+destination_for_kernel_binary:
+.long	KERNEL_PHYSICAL_BASE_ADDRESS
+.align 16	
+disk_buffer:	
+.fill 512, 1, 0xcc

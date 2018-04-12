@@ -54,6 +54,7 @@ kernel_entry_point:
 	subl	%esp,	%ecx
 	movl	$(0x200000 - 1),	%edi
 	std
+	jmp	.
 	rep	movsb
 	cld
 	incl	%edi
