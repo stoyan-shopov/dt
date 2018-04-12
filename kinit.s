@@ -54,7 +54,8 @@ gdtr_value:
 
 #.code32
 /* gdt physical base address */
-.long	gdt + KINIT_PHYSICAL_BASE_ADDRESS
+gdt_address:
+.long	gdt
 #.code16
 
 
@@ -77,7 +78,8 @@ unreal_gdtr_value:
 
 #.code32
 /* gdt physical base address */
-.long	unreal_gdt + KINIT_PHYSICAL_BASE_ADDRESS
+unreal_gdt_address:
+.long	unreal_gdt
 #.code16
 
 
@@ -317,6 +319,15 @@ enable_gate_a20:
 	orb	$2,		%al
 	outb	%al,		$0x92
 
+	pushw	%cs
+	popw	%ds
+
+	xorl	%eax,	%eax
+	movw	%ds,	%ax
+	shll	$4,	%eax
+	addl	%eax,	gdt_address
+	addl	%eax,	unreal_gdt_address
+
 enter_unreal_mode:
 	cli
 	/* load unreal global descriptor table register */
@@ -440,10 +451,6 @@ enter_protected_mode:
 	movl	(display_image_and_halt + KINIT_PHYSICAL_BASE_ADDRESS),	%eax
 	pushl	%eax
 	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%eax
-
-	xorl	%ecx,	%ecx
-	jcxz	.
-
 	call	*%eax
 	jmp	.
 

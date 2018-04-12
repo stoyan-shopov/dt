@@ -40,25 +40,14 @@ THE SOFTWARE.
 .global read_io_port_long
 .global write_io_port_long
 .global enable_paging_low
-.global enable_gate_a20
 .global get_irq_flag_and_disable_irqs
 .global restore_irq_flag
 
 kernel_entry_point:
-	/* copy any stack parameters, and relocate the stack */
-	/* assumed is that the top of the stack is set up at this location */
-	movl	$.,	%ecx
-	call	enable_gate_a20
-	movl	%ecx,	%esi
-	decl	%esi
-	subl	%esp,	%ecx
-	movl	$(0x200000 - 1),	%edi
-	std
-	jmp	.
-	rep	movsb
-	cld
-	incl	%edi
-	movl	%edi,	%esp
+	/* copy stack parameters, and relocate the stack */
+	popl	%eax
+	movl	$0x200000,	%esp
+	pushl	%eax
 	jmp	kmain
 
 load_idtr:
@@ -410,13 +399,6 @@ mouse_interrupt_handler:
 	popal
 
 	iret
-
-enable_gate_a20:
-
-	inb	$0x92,		%al
-	orb	$2,		%al
-	outb	%al,		$0x92
-	ret
 
 get_irq_flag_and_disable_irqs:
 	pushfl
