@@ -58,6 +58,8 @@ stresc: utils/stresc.c
 
 boot.bin: boot
 	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
+pxeboot.0: pxeboot
+	objcopy -O binary $<$(EXECUTABLE_EXTENSION) $@
 #boot: boot.s
 #$(CC) -m32 -nostdlib -Wl,-eentry_point -T boot.ld -o $@ $<
 	
@@ -73,14 +75,14 @@ kinit: kinit.s
 	$(CC) -m32 -nostdlib -Wa,--divide -Wl,-eentry_point -T boot.ld -o $@ $<
 
 clean:
-	-rm boot.bin boot kinit.bin kinit kernel.bin kernel \
+	-rm boot.bin boot pxeboot.0 pxeboot kinit.bin kinit kernel.bin kernel \
 		$(KINIT_OBJECTS) $(KOBJECTS) $(SFORTH_OBJECTS) \
 		$(SFORTH_ESCAPED_CODE_FILES)
 	-rm 1.bin 2.bin 3.bin 4.bin
 	-rm boot$(EXECUTABLE_EXTENSION) kinit$(EXECUTABLE_EXTENSION) kernel$(EXECUTABLE_EXTENSION)
 	-rm dt.img
 
-dt.img:	boot.bin kinit.bin kernel.bin
+dt.img:	boot.bin pxeboot.0 kinit.bin kernel.bin
 	objcopy -I binary -O binary --gap-fill 0 --pad-to $(KINIT_START) boot.bin 1.bin
 	cat 1.bin kinit.bin > 2.bin
 	objcopy -I binary -O binary --gap-fill 0 --pad-to $(KERNEL_START) 2.bin 3.bin

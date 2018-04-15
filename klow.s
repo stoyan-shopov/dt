@@ -48,7 +48,10 @@ kernel_entry_point:
 	popl	%eax
 	movl	$0x200000,	%esp
 	pushl	%eax
-	jmp	kmain
+	call	kmain
+	cli
+	hlt
+	jmp	.
 
 load_idtr:
 	lidt	x86_idtr_value
