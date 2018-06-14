@@ -95,9 +95,9 @@ xxx | xxx | xxxx | xxxxxxxxx | xxxxxxxxx
 01234567890123456789012345678901234567890
 [then]
 
-: vertical-delimiter ( --) [char] | emit space ;
+: vertical-delimiter ( --) s" |" print-table-glyphs space ;
 : horizontal-delimiter ( __)
-	." ----+-----+------+-----------+-----------+"cr ;
+	s" ----+-----+------+-----------+-----------+" print-table-glyphs cr ;
 : pci-dump-device ( -- t:abort scanning|f:continue scanning)
 	current-bus-nr 3 .r vertical-delimiter
 	current-device-nr 3 .r vertical-delimiter

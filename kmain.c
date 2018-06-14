@@ -29,6 +29,8 @@ static uint8_t INITIAL_DT_SFORTH_CODE[] =
 #include "init.efs"
 
 " cr .( loading modules...) cr "
+#include "console.efs"
+#include "vga.efs"
 #include "pci.efs"
 #include "ata.efs"
 #include "arena.efs"
