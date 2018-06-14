@@ -124,6 +124,13 @@ base !
 	over - spaces type
 	;
 : r" ( count chars"... --)
-	literal postpone s" postpone rot postpone literal postpone execute ; immediate
+	literal
+	state @ 0= if
+		\ interpreting
+		>r postpone s" rot r> execute
+	else
+		\ compiling
+		postpone s" postpone rot postpone literal postpone execute
+	then ; immediate
 
 .( this is console number ) active-process . cr

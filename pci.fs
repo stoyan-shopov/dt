@@ -87,17 +87,32 @@ false value abort-scanning
 	loop
 	base !
 	;
+0 [if]
 
+bus | dev | func | vendor id | device id
+xxx | xxx | xxxx | xxxxxxxxx | xxxxxxxxx
+0         1         2         3         4
+01234567890123456789012345678901234567890
+[then]
+
+: vertical-delimiter ( --) [char] | emit space ;
+: horizontal-delimiter ( __)
+	." ----+-----+------+-----------+-----------+"cr ;
 : pci-dump-device ( -- t:abort scanning|f:continue scanning)
-	[char] * emit current-bus-nr . current-device-nr . current-function-nr . [char] * emit bl emit
+	current-bus-nr 3 .r vertical-delimiter
+	current-device-nr 3 .r vertical-delimiter
+	current-function-nr 4 .r vertical-delimiter
 	current-bus-nr current-device-nr current-function-nr read-id
-	." vendor id: " dup $ffff and .
-	." device id: " 16 rshift . cr
+	( vendor id: ) dup $ffff and 9 .r vertical-delimiter
+	( device id: ) 16 rshift 9 .r vertical-delimiter cr
+	horizontal-delimiter
 	false
 	;
 
 : pci-list-devices ( --)
-	." scanning all pci buses for devices..." cr
+	." scanning all pci buses for devices..." cr cr
+	." bus | dev | func | vendor id | device id"cr
+	horizontal-delimiter
 	[ ' pci-dump-device literal ] pci-scan
 	cr ." a total of " pci-dev-total . ." pci devices found" cr
 	;
