@@ -110,6 +110,8 @@ xxx | xxx | xxxx | xxxxxx | xxxxxx | xxxxxxxxxx | xxxxxxxx |
 : horizontal-delimiter ( --)
 	s" ----+-----+------+--------+--------+------------+----------]"
 	print-table-glyphs cr ;
+
+variable found-pci-devices-bitmap
 : pci-dump-device ( -- t:abort scanning|f:continue scanning)
 	horizontal-delimiter
 	current-bus-nr 3 .r vertical-delimiter
@@ -119,19 +121,44 @@ xxx | xxx | xxxx | xxxxxx | xxxxxx | xxxxxxxxxx | xxxxxxxx |
 	( vendor id) dup $ffff and 6 .r vertical-delimiter
 	( device id) 16 rshift 6 .r vertical-delimiter
 	current-bus-nr current-device-nr current-function-nr read-class-code
-	( base class) dup 24 rshift $ff and 10 .r vertical-delimiter
+	( base class) dup 24 rshift $ff and 1 over lshift found-pci-devices-bitmap @ or found-pci-devices-bitmap ! 10 .r vertical-delimiter
 	( subclass) 16 rshift $ff and 8 .r vertical-delimiter
 	cr
 	false
 	;
 
 : pci-list-devices ( --)
+	0 found-pci-devices-bitmap !
 	." scanning all pci buses for devices..." cr cr
 	s" bus | dev | func | vendor | device | base class | subclass |" print-table-glyphs cr
 	[ ' pci-dump-device literal ] pci-scan
 	s" ----^-----^------^--------^--------^------------^----------]"
 	print-table-glyphs cr
 	cr ." a total of " pci-dev-total . ." pci devices found" cr
+
+	cr
+	found-pci-devices-bitmap @
+	dup [ 1 0 lshift literal ] and if ." 00h Device was built before Class Code definitions were finalized" cr then
+	dup [ 1 1 lshift literal ] and if ." 01h Mass storage controller" cr then
+	dup [ 1 2 lshift literal ] and if ." 02h Network controller" cr then
+	dup [ 1 3 lshift literal ] and if ." 03h Display controller" cr then
+	dup [ 1 4 lshift literal ] and if ." 04h Multimedia device" cr then
+	dup [ 1 5 lshift literal ] and if ." 05h Memory controller" cr then
+	dup [ 1 6 lshift literal ] and if ." 06h Bridge device" cr then
+	dup [ 1 7 lshift literal ] and if ." 07h Simple communication controllers" cr then
+	dup [ 1 8 lshift literal ] and if ." 08h Base system peripherals" cr then
+	dup [ 1 9 lshift literal ] and if ." 09h Input devices" cr then
+	dup [ 1 $a lshift literal ] and if ." 0Ah Docking stations" cr then
+	dup [ 1 $b lshift literal ] and if ." 0Bh Processors" cr then
+	dup [ 1 $c lshift literal ] and if ." 0Ch Serial bus controllers" cr then
+	dup [ 1 $d lshift literal ] and if ." 0Dh Wireless controller" cr then
+	dup [ 1 $e lshift literal ] and if ." 0Eh Intelligent I/O controllers" cr then
+	dup [ 1 $f lshift literal ] and if ." 0Fh Satellite communication controllers" cr then
+	dup [ 1 $11 lshift literal ] and if ." 10h Encryption/Decryption controllers" cr then
+	dup [ 1 $12 lshift literal ] and if ." 11h Data acquisition and signal processing controllers" cr then
+	drop
+	\ ." 12h - FEh Reserved" cr
+	\ ." FFh Device does not fit in any defined classes" cr
 	;
 0 value searched-vendor-id
 0 value searched-product-id
