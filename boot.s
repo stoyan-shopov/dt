@@ -35,6 +35,11 @@ entry_point:
 .org 0
 	/* normalize addresses - start from 0 */
 	jmpl	$BIOS_BOOT_SEG_BASE, $start
+display_image_and_halt:
+.word	0
+boot_selection_string_start:
+.asciz	"\nDT\n1 - display image\nOther - normal boot"
+
 init_message:
 	.asciz	"death track bootloader launched"
 read_error_message:
@@ -133,8 +138,7 @@ print_msg:
 	movb	%cs:current_text_attributes,	%ah
 
 1:
-	lodsb
-	stosb
+	movsb
 	/* check for null terminator - prepare flags for the 'loopnz' below */
 	orb	%al,	%al
 	movb	%al,	%cl
@@ -157,9 +161,43 @@ start:
 	movw	%ax,	%ss
 	movw	$STACK_BASE,	%sp
 
+	/* print boot option menu */
+	movw	$boot_selection_string_start,	%si
+1:
+	movb	$0xa,	%ah
+	movw	$1,	%cx
+	movw	$0x0000,	%bx
+	lodsb	%ds:(%si),	%al
+	orb	%al,	%al
+	jz	3f
+	pushw	%ax
+	cmpb	$'\n',	%al
+	je	4f
+	int	$0x10
+4:
+	movb	$3,	%ah
+	int	$0x10
+	popw	%ax
+	incb	%dl
+	cmpb	$'\n',	%al
+	jne	2f
+	movb	$0,	%dl
+	incb	%dh
+2:
+	movb	$2,	%ah
+	int	$0x10
+
+	jmp	1b
+3:
+	movw	$0x0,	%ax
+	int	$0x16
+	cmpb	$'1',	%al
+	jne	1f
+	movb	$1,	display_image_and_halt
+1:
+
 	leaw	init_message,	%si
 	callw	print_msg
-	leaw	init_message,	%si
 	movw	$100,	%cx
 	movw	$(80 * 2),	video_ptr
 	movb	$8,	%ah
@@ -168,21 +206,16 @@ start:
 	int	$0x13
 	pushw	%dx
 	pushw	%cx
-	pushw	%bx
-	pushw	%ax
 	movw	%sp,	%si
 	movw	$8,	%cx
 	callw	dump_data_block
 
 	xorw	%ax,	%ax
-	//int	$0x16
 
 	/* read and jump to the death track kernel */
 	movw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4),	%ax
 	movw	%ax,	%es
 	/* load sectors per track count */
-	popw	%ax
-	popw	%ax
 	popw	%ax
 	andb	$0x3f,	%al
 	movb	$2,	%ah
@@ -234,18 +267,15 @@ start:
 	addw	$0x20,	%ax
 	movw	%ax,	%ds
 	xorw	%ax,	%ax
-	//int	$0x16
 	jmp	1b
 1:
 	movw	$VIDEO_SEG_BASE,	%ax
 	movw	%ax,	%ds
 	movb	$'?',	0
-	pushw	$0	/* 0 - do not display image */
-	pushw	$1	/* force kernel loading */
+	pushw	%cs:display_image_and_halt
+	pushw	$1	/* 1 - force kernel loading */
 	callw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4), $0
 	jmp	.
-
-	/* read sectors */
 
 .org 512 - 2
 	/* boot sector signature - 2 bytes */
