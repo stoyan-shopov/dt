@@ -240,7 +240,7 @@ start:
 	movw	$VIDEO_SEG_BASE,	%ax
 	movw	%ax,	%ds
 	movb	$'?',	0
-	pushw	$0	/* do not display image */
+	pushw	$0	/* 0 - do not display image */
 	pushw	$1	/* force kernel loading */
 	callw	$(KINIT_PHYSICAL_BASE_ADDRESS >> 4), $0
 	jmp	.

@@ -42,10 +42,6 @@ entry_point:
 .org 0
 	/* normalize addresses - start from 0 */
 	jmpl	$BIOS_BOOT_SEG_BASE, $start
-init_message:
-	.asciz	"death track bootloader launched"
-read_error_message:
-	.asciz	"failed to read the death track kernel"
 current_text_attributes:
 	.byte	3
 /*
@@ -173,6 +169,8 @@ pxenv_cached_info_buffer:
 
 pxenv_tftp_open_buffer:
 .word	0
+/* TODO: this is the default ip of the tftp server supplied by virtualbox;
+ * it hould be adjusted for a non-virtual pxe boot environment */
 .byte	10, 0, 2, 4
 .byte	0, 0, 0, 0
 .asciz	"dt.bin"
@@ -198,8 +196,45 @@ tftp_read_packet_length:
 
 destination_for_kernel_binary:
 .long	KERNEL_PHYSICAL_BASE_ADDRESS
+display_image_and_halt:
+.long	0
+boot_selection_string_start:
+.asciz	"\nDeath Track kernel PXE loader\n\nChoose boot option:\n1 - display image and halt\nAny other key - normal boot\n"
 
 start:
+	movw	$boot_selection_string_start,	%si
+1:
+	movb	$0xa,	%ah
+	movw	$1,	%cx
+	movw	$0x0000,	%bx
+	lodsb	%cs:(%si),	%al
+	orb	%al,	%al
+	jz	3f
+	pushw	%ax
+	cmpb	$'\n',	%al
+	je	4f
+	int	$0x10
+4:
+	movb	$3,	%ah
+	int	$0x10
+	popw	%ax
+	incb	%dl
+	cmpb	$'\n',	%al
+	jne	2f
+	movb	$0,	%dl
+	incb	%dh
+2:
+	movb	$2,	%ah
+	int	$0x10
+
+	jmp	1b
+3:
+	movw	$0x0,	%ax
+	int	$0x16
+	cmpb	$'1',	%al
+	jne	1f
+	movb	$1,	%cs:display_image_and_halt
+1:
 
 enable_gate_a20:
 
@@ -310,8 +345,21 @@ read_kernel_loop:
 	/* ignore status return code */
 
 	/* switch text mode */
-	movw	$6,	%ax
+	cmpb	$0,	%cs:display_image_and_halt
+	je	switch_to_80x50_text_mode
+switch_to_monochrome_graphics_mode:
+	movw	$6,	%ax	/* graphics mode - cga, monochrome */
 	int	$0x10
+	jmp	1f
+switch_to_80x50_text_mode:
+	movw	$3,	%ax	/* text mode, 80x50 */
+	mov	$0x1112,	%ax
+	xorw	%bx,	%bx
+	int	$0x10
+	int	$0x10
+1:
+
+	movl	%cs:display_image_and_halt,	%ebx
 
 enter_protected_mode:
 	cli
@@ -330,13 +378,12 @@ enter_protected_mode:
 	movw	%ax,	%ds
 	movw	%ax,	%es
 	movw	%ax,	%ss
+	/* TODO: THIS IS WRONG!!! THIS ADDRESS MAY FALL IN THE ROM BIOS!!! */
 	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%esp
 	movb	$'Q',	0xb8000
-#movl	(display_image_and_halt + KINIT_PHYSICAL_BASE_ADDRESS),	%eax
-	movl	$1,	%eax
-	pushl	%eax
-	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%eax
-	jmp	*%eax
+	movl	%ebx,	%eax	/* display image and halt parameter */
+	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%ebx
+	jmp	*%ebx
 
 .align 8
 /* define the protected mode global descriptor table */

@@ -446,12 +446,12 @@ enter_protected_mode:
 	movw	%ax,	%ds
 	movw	%ax,	%es
 	movw	%ax,	%ss
+	/* TODO: THIS IS WRONG!!! THIS ADDRESS MAY FALL IN THE ROM BIOS!!! */
 	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%esp
 	movb	$'Q',	0xb8000
 	movl	(display_image_and_halt + KINIT_PHYSICAL_BASE_ADDRESS),	%eax
-	pushl	%eax
-	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%eax
-	call	*%eax
+	movl	$KERNEL_PHYSICAL_BASE_ADDRESS,	%ebx
+	jmpl	*%ebx
 	jmp	.
 
 .align 4	

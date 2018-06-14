@@ -117,4 +117,13 @@ cr
 
 base !
 
+\ right-aligned text printing
+:noname ( c-addr count alignment --)
+\ right aligned printing
+	2dup < invert if drop type exit then
+	over - spaces type
+	;
+: r" ( count chars"... --)
+	literal postpone s" postpone rot postpone literal postpone execute ; immediate
+
 .( this is console number ) active-process . cr

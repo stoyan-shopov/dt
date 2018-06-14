@@ -44,8 +44,9 @@ THE SOFTWARE.
 .global restore_irq_flag
 
 kernel_entry_point:
+	/* TODO: CURRENTLY, A SINGLE PARAMETER IS BEING PASSED TO THE KERNEL IN %EAX - 'LOAD IMAGE, AND HALT (A BOOLEAN)';
+	 * STACK PARAMETER PASSING IS CURRENTLY BROKEN */
 	/* copy stack parameters, and relocate the stack */
-	popl	%eax
 	movl	$0x200000,	%esp
 	pushl	%eax
 	call	kmain
