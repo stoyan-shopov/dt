@@ -111,7 +111,7 @@ xxx | xxx | xxxx | xxxxxx | xxxxxx | xxxxxxxxxx | xxxxxxxx |
 	s" ----+-----+------+--------+--------+------------+----------]"
 	print-table-glyphs cr ;
 
-variable found-pci-devices-bitmap
+variable found-pci-device-classes-bitmap
 : pci-dump-device ( -- t:abort scanning|f:continue scanning)
 	horizontal-delimiter
 	current-bus-nr 3 .r vertical-delimiter
@@ -121,14 +121,14 @@ variable found-pci-devices-bitmap
 	( vendor id) dup $ffff and 6 .r vertical-delimiter
 	( device id) 16 rshift 6 .r vertical-delimiter
 	current-bus-nr current-device-nr current-function-nr read-class-code
-	( base class) dup 24 rshift $ff and 1 over lshift found-pci-devices-bitmap @ or found-pci-devices-bitmap ! 10 .r vertical-delimiter
+	( base class) dup 24 rshift $ff and 1 over lshift found-pci-device-classes-bitmap @ or found-pci-device-classes-bitmap ! 10 .r vertical-delimiter
 	( subclass) 16 rshift $ff and 8 .r vertical-delimiter
 	cr
 	false
 	;
 
 : pci-list-devices ( --)
-	0 found-pci-devices-bitmap !
+	0 found-pci-device-classes-bitmap !
 	." scanning all pci buses for devices..." cr cr
 	s" bus | dev | func | vendor | device | base class | subclass |" print-table-glyphs cr
 	[ ' pci-dump-device literal ] pci-scan
@@ -137,7 +137,7 @@ variable found-pci-devices-bitmap
 	cr ." a total of " pci-dev-total . ." pci devices found" cr
 
 	cr
-	found-pci-devices-bitmap @
+	found-pci-device-classes-bitmap @
 	dup [ 1 0 lshift literal ] and if ." 00h Device was built before Class Code definitions were finalized" cr then
 	dup [ 1 1 lshift literal ] and if ." 01h Mass storage controller" cr then
 	dup [ 1 2 lshift literal ] and if ." 02h Network controller" cr then
