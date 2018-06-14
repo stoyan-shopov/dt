@@ -5,6 +5,8 @@
 		[char] | of 179 endof
 		[char] - of 196 endof
 		[char] + of 197 endof
+		[char] ^ of 193 endof
+		[char] ] of 180 endof
 		( ." warning: character not translated!!!"cr)
 		dup
 	endcase

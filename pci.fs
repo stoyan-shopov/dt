@@ -45,6 +45,17 @@ $cfc constant IO-PCIDATA
 	IO-PCIDATA inpl
 	;
 
+: read-class-code ( bus-nr device-nr function-nr -- class-code-register)
+\ the class code register is broken in byte fields:
+\ byte 3 - base class code
+\ byte 2 - subclass
+\ byte 1 - device-dependent interface level
+\ byte 0 - revision id
+	make-pci-config-address ( pci class register offset) 8 +
+	IO-PCICFG outpl
+	IO-PCIDATA inpl
+	;
+
 : ?pci-dev-present ( bus-nr device-nr function-nr -- t=device found|f=device not found)
 	read-id
 	$ffffffff <>
@@ -89,31 +100,37 @@ false value abort-scanning
 	;
 0 [if]
 
-bus | dev | func | vendor id | device id
-xxx | xxx | xxxx | xxxxxxxxx | xxxxxxxxx
+bus | dev | func | vendor | device | base class | subclass |
+xxx | xxx | xxxx | xxxxxx | xxxxxx | xxxxxxxxxx | xxxxxxxx |
 0         1         2         3         4
 01234567890123456789012345678901234567890
 [then]
 
 : vertical-delimiter ( --) s" |" print-table-glyphs space ;
-: horizontal-delimiter ( __)
-	s" ----+-----+------+-----------+-----------+" print-table-glyphs cr ;
+: horizontal-delimiter ( --)
+	s" ----+-----+------+--------+--------+------------+----------]"
+	print-table-glyphs cr ;
 : pci-dump-device ( -- t:abort scanning|f:continue scanning)
+	horizontal-delimiter
 	current-bus-nr 3 .r vertical-delimiter
 	current-device-nr 3 .r vertical-delimiter
 	current-function-nr 4 .r vertical-delimiter
 	current-bus-nr current-device-nr current-function-nr read-id
-	( vendor id: ) dup $ffff and 9 .r vertical-delimiter
-	( device id: ) 16 rshift 9 .r vertical-delimiter cr
-	horizontal-delimiter
+	( vendor id) dup $ffff and 6 .r vertical-delimiter
+	( device id) 16 rshift 6 .r vertical-delimiter
+	current-bus-nr current-device-nr current-function-nr read-class-code
+	( base class) dup 24 rshift $ff and 10 .r vertical-delimiter
+	( subclass) 16 rshift $ff and 8 .r vertical-delimiter
+	cr
 	false
 	;
 
 : pci-list-devices ( --)
 	." scanning all pci buses for devices..." cr cr
-	." bus | dev | func | vendor id | device id"cr
-	horizontal-delimiter
+	s" bus | dev | func | vendor | device | base class | subclass |" print-table-glyphs cr
 	[ ' pci-dump-device literal ] pci-scan
+	s" ----^-----^------^--------^--------^------------^----------]"
+	print-table-glyphs cr
 	cr ." a total of " pci-dev-total . ." pci devices found" cr
 	;
 0 value searched-vendor-id
