@@ -81,6 +81,7 @@ extern char _data_start;
 		return;
 	if (active_process == task_number)
 		return;
+	/* TODO - this is not protected against interrupts, check this!!! */
 	if (!setjmp(kernel_process_contexts[active_process]))
 	{
 		active_process = task_number;
