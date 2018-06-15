@@ -9,7 +9,8 @@ KINIT_OBJECTS = kinit.o
 KOBJECTS = klow.o kmain.o idt.o simple-console.o setjmp.o dictionary-ext.o \
 	   init-pgdir-tab.o \
 	   common-data.o \
-	   fork.o
+	   fork.o \
+	   physical-mem-map.o
 
 SFORTH_OBJECTS = sforth/engine.o sf-arch.o sforth/sf-opt-file.o sforth/sf-opt-string.o sforth/sf-opt-prog-tools.o
 SFORTH_ESCAPED_CODE_FILES = arena.efs pci.efs init.efs ata.efs console.efs vga.efs

@@ -21,6 +21,7 @@ THE SOFTWARE.
 */
 #include <stdbool.h>
 #include "graphics-image.h"
+#include "physical-mem-map.h"
 #include "idt.h"
 #include "setjmp.h"
 
@@ -124,6 +125,7 @@ void (* const * finit) (void);
 
 	populate_initial_page_directory();
 	enable_paging();
+	init_physical_mem_map();
 
 	fork();
 

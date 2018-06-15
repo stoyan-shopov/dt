@@ -97,4 +97,25 @@ extern char _data_start;
 		do_console_refresh();
 }
 
+void mem_disable_cache_for_page(uint32_t address)
+{
+	if (address & 0xfffc00fff)
+	{
+		print_str(__func__);
+		print_str("(): bad address\n");
+		return;
+	}
+	init_pgdir_tab.pgtab[0][address >> 12].page_level_cache_disable = PGTE_PAGE_LEVEL_CACHE_DISABLED;
+}
+
+void mem_map_physical_page(uint32_t virtual_address, uint32_t physical_address)
+{
+	if (virtual_address & 0xfffc00fff)
+	{
+		print_str(__func__);
+		print_str("(): bad virtual address\n");
+		return;
+	}
+	init_pgdir_tab.pgtab[0][virtual_address >> 12].physical_address = physical_address;
+}
 

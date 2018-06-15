@@ -31,6 +31,11 @@ SECTIONS
 		_common_data_end	= .;
 	} > ram AT> rom
 
+	.physical-mem-map ALIGN(4096)	:
+	{
+		*(.physical-mem-map)
+	} > ram /* uninitialized */
+
 	.data ALIGN(4096)	:
 	{
 		_data_start	= .;
