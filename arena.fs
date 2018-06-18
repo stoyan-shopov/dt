@@ -117,4 +117,9 @@ cr
 
 base !
 
+$f0804000 constant ohci
+phys-mem-window-base constant p
+ohci phys-mem-map
+
+
 .( this is console number ) active-process . cr

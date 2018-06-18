@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include <engine.h>
 #include <sf-word-wizard.h>
 
-static uint32_t physical_mem_map_window[16] __attribute__((section(".physical-mem-map")));
+static unsigned char physical_mem_map_window[4 /* pages */ * (4 * 1024)] __attribute__((section(".physical-mem-map")));
 
 static do_physical_mem_window_base_address(void) { sf_push((cell) physical_mem_map_window); }
 static do_physical_mem_map(void)
