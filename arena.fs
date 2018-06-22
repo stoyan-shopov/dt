@@ -117,9 +117,61 @@ cr
 
 base !
 
-$f0804000 constant ohci
-phys-mem-window-base constant p
-ohci phys-mem-map
+\ this value was obtained by reading the BAR0 pci register of the virtualbox
+\ ohci device
+$f0804000 constant ohci-physical-mem-base
+phys-mem-window-base constant ohci
+ohci-physical-mem-base phys-mem-map
 
+: ohci-dump ( --)
+	\ print ohci connection status
+	ohci $48 + @ $ff and 0 do
+		." port "i . ." status: "
+		ohci $54 + i cells + @ 1 and 0<> if ." connected" else ." not connected" then cr
+	loop
+;
 
+cr .( ***********************************)
+cr .( virtualbox OHCI test drive words)
+cr .( ***********************************)cr
+
+\ allocata OHCI HCCA area (256 bytes)
+0 value OHCI-HCCA
+\ the ohci hcca must be 256 byte-aligned
+\ align
+here negate $ff and allot
+\ allocate hcca
+here to OHCI-HCCA 256 allot
+OHCI-HCCA 256 0 fill
+
+: ohci-init ( --)
+	\ sanity checks
+	ohci HcControl + @ dup IR and 0<> abort" fatal: refusing to initialize ohci controller"
+	HCFS-get HCFS-UsbReset <> abort" fatal: bad initial ohci state"
+	\ initialize; refer to section 5.1.1.4 - 'Setup Host Controller'
+	\ in the USB OHCI document
+	\ save HcFmInterval
+	ohci HcFmInterval + @
+	HCR ohci HcCommandStatus + !
+	\ wait for reset to complete
+	begin ohci HcCommandStatus + @ HCR and 0= until
+	\ make sure the host controller is now in a 'suspend' state
+	ohci HcControl + @ HCFS-get HCFS-UsbSuspend <> abort" fatal: failed to reset ohci controller"
+	\ restore HcFmInterval
+	ohci HcFmInterval + !
+	$3e67 ohci HcPeriodicStart + !
+	\ The 'UsbOperational' state should be entered within 2 ms
+	\ following reset completion, because the bus will then be in
+	\ a 'UsbSuspend' state, and if the bus stays more than 3 ms in
+	\ a 'UsbSuspend' state, then the bus will enter a 'Suspend' state.
+	\ If the USB is in a 'Suspend' state, it needs to go through a
+	\ USB 'Resume' state to wake up devices on the bus, and only then
+	\ can enter a USB 'Operational' state. There is really no need
+	\ for these complications on OHCI initialization, so make sure
+	\ that the OHCI controller only stays for a short time (less than
+	\ 2 ms) in the 'UsbSuspend' state
+	ohci HcControl + dup @ HCFS-UsbOperational HCFS-set swap !
+	." USB OHCI initialization complete"cr cr
+	;
 .( this is console number ) active-process . cr
+

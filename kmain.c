@@ -34,6 +34,7 @@ static uint8_t INITIAL_DT_SFORTH_CODE[] =
 #include "vga.efs"
 #include "pci.efs"
 #include "ata.efs"
+#include "ohci.efs"
 #include "arena.efs"
 " cr .( modules loaded) cr "
 //" source type "
