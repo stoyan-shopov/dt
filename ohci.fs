@@ -38,6 +38,16 @@ $8	constant HcCommandStatus \ this is a 'write-1-to-set, zeroes-ignored' registe
 	2 bit constant BLF \ bulk list filled
 	3 bit constant OCR \ ownership change reguest
 $C	constant HcInterruptStatus
+\ fields in the HcInterruptStatus register
+	0 bit constant SO \ scheduling overrun
+	1 bit constant WDH \ writeback done for done queue head in the HCCA area
+	2 bit constant SF \ start of frame
+	3 bit constant RD \ resume detected
+	4 bit constant UE \ unrecoverable error
+	5 bit constant FNO \ frame number overflow
+	6 bit constant RHSC \ root hub status change
+	30 bit constant OC \ ownership change
+
 $10	constant HcInterruptEnable
 \ fields in the HcInterruptEnable register
 	31 bit constant MIE \ master interrupt enable

@@ -27,6 +27,7 @@ THE SOFTWARE.
 static unsigned char physical_mem_map_window[4 /* pages */ * (4 * 1024)] __attribute__((section(".physical-mem-map")));
 
 static do_physical_mem_window_base_address(void) { sf_push((cell) physical_mem_map_window); }
+static do_mem_page_disable_caching(void) { /* ( page-aligned-base-address --) */ mem_disable_cache_for_page(sf_pop()); }
 static do_physical_mem_map(void)
 {
 	/* ( physical-base-address --) */
@@ -41,6 +42,7 @@ static struct word dict_base_dummy_word[1] = { MKWORD(0, 0, 0, "", 0), };
 static const struct word custom_dict[] = {
 	MKWORD(dict_base_dummy_word,	0,	"phys-mem-window-base",		do_physical_mem_window_base_address),
 	MKWORD(custom_dict,	__COUNTER__,	"phys-mem-map",			do_physical_mem_map),
+	MKWORD(custom_dict,	__COUNTER__,	"mem-page-disable-caching",	do_mem_page_disable_caching),
 
 }, * custom_dict_start = custom_dict + __COUNTER__;
 

@@ -137,12 +137,78 @@ cr .( ***********************************)cr
 
 \ allocata OHCI HCCA area (256 bytes)
 0 value OHCI-HCCA
+0 value ohci-hcca-done-head-address
+: ohci-hcca-done-head ( -- done-head)
+	ohci-hcca-done-head-address @ ;
+0 value ohci-data-page-base-address
+\ test transfer related data
+0 value test-ED
+0 value test-TD1
+0 value test-TD2
+0 value test-TD3
+0 value test-ohci-data-area
+
+
+\ allocate a whole 4k page for use by the usb ohci
+\ skip to a new page - pad to end of current page
+here negate 12 bit 1- and allot
+here to ohci-data-page-base-address
+here 4096 0 fill
+
 \ the ohci hcca must be 256 byte-aligned
-\ align
 here negate $ff and allot
 \ allocate hcca
 here to OHCI-HCCA 256 allot
-OHCI-HCCA 256 0 fill
+OHCI-HCCA $84 + to ohci-hcca-done-head-address
+
+\ test endpoint descriptor and tranfer descriptor data fields
+align
+here to test-ED  4 cells allot
+here to test-TD1 4 cells allot
+here to test-TD2 4 cells allot
+here to test-TD3 4 cells allot
+here to test-ohci-data-area
+
+\ skip to next page
+here negate 12 bit 1- and allot
+\ disable caching for the ohci data page
+OHCI-HCCA mem-page-disable-caching
+\ initialize test endpoint descriptor - 
+0 ( get direction from transfer descriptor) 
+64 ( maximum packet size) 16 lshift or
+test-ED !
+\ initialize TD queue tail pointer
+test-TD3 test-ED 1 cells + !
+\ initialize TD queue head pointer
+test-TD3 test-ED 2 cells + !
+\ initialize next ED pointer - null
+0 test-ED 3 cells + !
+
+\ initialize test transfer descriptors - a single 'read device descriptor' control transfer
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\ setup stage - 8 bytes sent to device
+18 bit ( buffer rounding) 2 ( toggle bit - 0) 24 lshift or
+test-TD1 !
+\ current buffer pointer
+test-ohci-data-area test-TD1 1 cells + !
+\ next TD
+test-TD2 test-TD1 2 cells + !
+\ buffer end
+test-ohci-data-area 8 ( bytes in setup stage packet) 1- + test-TD1 3 cells + !
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\ data stage - read from device
+18 bit ( buffer rounding) 3 ( toggle bit - 1) 24 lshift or
+test-TD2 !
+\ current buffer pointer
+test-ohci-data-area 8 + test-TD2 1 cells + !
+\ next TD
+test-TD3 test-TD2 2 cells + !
+\ buffer end
+test-ohci-data-area 8 + 64 ( bytes for device descriptor - max) 1- + test-TD2 3 cells + !
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 : ohci-init ( --)
 	\ sanity checks
