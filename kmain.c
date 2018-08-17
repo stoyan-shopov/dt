@@ -123,6 +123,8 @@ void (* const * finit) (void);
 	if (0) _8042_init();
 
 	init_console();
+	init_uart1();
+	uart1_putchar('s');
 
 	populate_initial_page_directory();
 	enable_paging();

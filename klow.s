@@ -21,6 +21,18 @@ THE SOFTWARE.
 */
 .code32
 
+UART1_PORT_BASE		= 0x3f8
+UART1_RBR		= UART1_PORT_BASE + 0 /* byte access, receive buffer register, r/o access, DLAB bit - 0 */
+UART1_THR		= UART1_PORT_BASE + 0 /* byte access, transmitter holding register, w/o access, DLAB bit - 0 */
+UART1_DL		= UART1_PORT_BASE + 0 /* byte/word access, divisor latch register, r/w access, DLAB bit - 1 */
+UART1_IER		= UART1_PORT_BASE + 1 /* byte access, interrupt enable register, r/w access, DLAB bit - 0 */
+UART1_IIR		= UART1_PORT_BASE + 2 /* byte access, interrupt identification register, r/o access */
+UART1_FCR		= UART1_PORT_BASE + 2 /* byte access, fifo control register, w/o access */
+UART1_LCR		= UART1_PORT_BASE + 3 /* byte access, line control register, r/w access */
+UART1_MCR		= UART1_PORT_BASE + 4 /* byte access, modem control register, r/w access */
+UART1_LSR		= UART1_PORT_BASE + 5 /* byte access, line status register, r/w access */
+UART1_MSR		= UART1_PORT_BASE + 6 /* byte access, modem status register, r/w access */
+
 .extern	x86_idt
 .extern	translate_scancode
 .extern	kmain
@@ -42,6 +54,8 @@ THE SOFTWARE.
 .global enable_paging_low
 .global get_irq_flag_and_disable_irqs
 .global restore_irq_flag
+.global init_uart1
+.global uart1_putchar
 
 kernel_entry_point:
 	/* TODO: CURRENTLY, A SINGLE PARAMETER IS BEING PASSED TO THE KERNEL IN %EAX - 'LOAD IMAGE, AND HALT (A BOOLEAN)';
@@ -335,6 +349,49 @@ I8042_WRITE_COMMAND_BYTE	=	0x60
 	ret
 #############################################3
 
+init_uart1:
+	/* used this resource for serial port information:
+	   http://www.sci.muni.cz/docs/pc/serport.txt
+	 */
+	/* make sure the maximum baud rate is selected */
+	movw	$UART1_LCR,	%dx
+	movb	$(/* dlab bit */ 0x80 + /* 8 bit words */ 3 + /* no parity, one stop bit */ 0),	%al
+	outb	%al,	%dx
+	/* set maximum baud rate */
+	movw	$UART1_DL,	%dx
+	movb	$1,	%al
+	outb	%al,	%dx
+	/* clear dlab bit for normal operation */
+	movw	$UART1_LCR,	%dx
+	movb	$(/* clear dlab bit */ 0x00 + /* 8 bit words */ 3 + /* no parity, one stop bit */ 0),	%al
+	outb	%al,	%dx
+	/* disable all interrupts */
+	movw	$UART1_IER,	%dx
+	movb	$0,	%al
+	outb	%al,	%dx
+	/* disable irq in the modem control register */
+	movw	$UART1_MCR,	%dx
+	movb	$0,	%al
+	outb	%al,	%dx
+	/* disable fifos */
+	movw	$UART1_FCR,	%dx
+	movb	$0,	%al
+	outb	%al,	%dx
+
+	ret
+
+uart1_putchar:
+	/* wait for transmitter holding register empty */
+	movw	$UART1_LSR,	%dx
+1:
+	inb	%dx,	%al
+	testb	$(1 << 5),	%al
+	jz	1b
+
+	movl	4(%esp),	%eax
+	movw	$UART1_THR,	%dx
+	outb	%al,	%dx
+	ret
 
 keyboard_interrupt_handler_raw:
 	pushl	%eax
