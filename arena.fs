@@ -148,7 +148,6 @@ cr .( ***********************************)cr
 0 value test-TD3
 0 value test-ohci-data-area
 
-
 \ allocate a whole 4k page for use by the usb ohci
 \ skip to a new page - pad to end of current page
 here negate 12 bit 1- and allot
@@ -178,9 +177,11 @@ OHCI-HCCA mem-page-disable-caching
 64 ( maximum packet size) 16 lshift or
 test-ED !
 \ initialize TD queue tail pointer
-test-TD3 test-ED 1 cells + !
+\ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\ 0 test-ED 1 cells + !
+test-ohci-data-area test-ED 1 cells + !
 \ initialize TD queue head pointer
-test-TD3 test-ED 2 cells + !
+test-TD1 test-ED 2 cells + !
 \ initialize next ED pointer - null
 0 test-ED 3 cells + !
 
@@ -188,26 +189,66 @@ test-TD3 test-ED 2 cells + !
 
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 \ setup stage - 8 bytes sent to device
-18 bit ( buffer rounding) 2 ( toggle bit - 0) 24 lshift or
+18 bit ( buffer rounding) 2 ( toggle bit - 0) 24 lshift or ( setup packet) 0 19 lshift or
 test-TD1 !
 \ current buffer pointer
 test-ohci-data-area test-TD1 1 cells + !
 \ next TD
-test-TD2 test-TD1 2 cells + !
+test-TD3 test-TD1 2 cells + !
 \ buffer end
 test-ohci-data-area 8 ( bytes in setup stage packet) 1- + test-TD1 3 cells + !
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+0 [if]
+\ build a 'get descriptor' usb control request
+test-ohci-data-area
+$80 over c! 1+
+$06 over c! 1+
+$00 over c! 1+
+$01 over c! 1+
+$00 over c! 1+
+$00 over c! 1+
+$12 over c! 1+
+$00 over c! drop
+[then]
+
+1 [if]
+\ build a 'set address' usb control request
+test-ohci-data-area
+$00 over c! 1+
+$05 over c! 1+
+$00 over c! 1+
+$01 over c! 1+
+$00 over c! 1+
+$00 over c! 1+
+$00 over c! 1+
+$00 over c! drop
+[then]
+
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 \ data stage - read from device
-18 bit ( buffer rounding) 3 ( toggle bit - 1) 24 lshift or
+18 bit ( buffer rounding) 3 ( toggle bit - 1) 24 lshift or ( in packet) %10 19 lshift or
 test-TD2 !
 \ current buffer pointer
 test-ohci-data-area 8 + test-TD2 1 cells + !
 \ next TD
 test-TD3 test-TD2 2 cells + !
 \ buffer end
-test-ohci-data-area 8 + 64 ( bytes for device descriptor - max) 1- + test-TD2 3 cells + !
+test-ohci-data-area 8 + $12 ( bytes for device descriptor - max) 1- + test-TD2 3 cells + !
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\ handshake stage - send a zero-length packet to the device
+18 bit ( buffer rounding) 3 ( toggle bit - 1) 24 lshift or ( in packet) %10 19 lshift or
+test-TD3 !
+\ current buffer pointer
+0 test-TD3 1 cells + !
+\ next TD
+\ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+\ 0 test-TD3 2 cells + !
+test-ohci-data-area test-TD3 2 cells + !
+\ buffer end
+0 test-TD3 3 cells + !
 \ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 : ohci-init ( --)
@@ -225,6 +266,14 @@ test-ohci-data-area 8 + 64 ( bytes for device descriptor - max) 1- + test-TD2 3 
 	ohci HcControl + @ HCFS-get HCFS-UsbSuspend <> abort" fatal: failed to reset ohci controller"
 	\ restore HcFmInterval
 	ohci HcFmInterval + !
+	\ set HC registers
+	OHCI-HCCA ohci HcHCCA + !
+	0 ohci HcPeriodCurrentED + !
+	test-ED ohci HcControlHeadED + !
+	0 ohci HcControlCurrentED + !
+	0 ohci HcBulkHeadED + !
+	0 ohci HcBulkCurrentED + !
+	0 ohci HcDoneHead + !
 	$3e67 ohci HcPeriodicStart + !
 	\ The 'UsbOperational' state should be entered within 2 ms
 	\ following reset completion, because the bus will then be in
@@ -239,5 +288,39 @@ test-ohci-data-area 8 + 64 ( bytes for device descriptor - max) 1- + test-TD2 3 
 	ohci HcControl + dup @ HCFS-UsbOperational HCFS-set swap !
 	." USB OHCI initialization complete"cr cr
 	;
+
+: ?port1 ( --)
+	ohci HcRhPortStatus[1] + @
+	CCS over and 0<> if ." device connected" else ." device NOT connected" then cr
+	PES over and 0<> if ." port enabled" else ." port NOT enabled" then cr
+	PSS over and 0<> if ." port IS in suspend" else ." port not in suspend" then cr
+	PRS over and 0<> if ." port IS in reset" else ." port not in reset" then cr
+	LSDA over and 0<> if ." LOW speed device attached" else ." full speed device attached" then cr
+	drop
+	;
+
+: ohci-test-xfer ( --)
+	." attempting a test read device descriptor transfer..."cr
+	CLF ohci HcCommandStatus + !
+	ohci HcControl + @ CLE or ohci HcControl + !
+	;
+
+: port1-reset ( --)
+	PRS ohci HcRhPortStatus[1] + !
+	;
+
+: ?ohci ( reg --)
+	base @ >r hex ohci + @ u. cr r> base ! ;
+
+: ohci-count ( -- sof-count)
+	SF ohci HcInterruptStatus + !
+	begin ohci HcInterruptStatus + @ SF and until
+	SF ohci HcInterruptStatus + !
+	0
+	begin 1+ ohci HcInterruptStatus + @ SF and until
+	;
+
+ohci-init
+
 .( this is console number ) active-process . cr
 

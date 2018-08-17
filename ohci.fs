@@ -67,3 +67,19 @@ $3C	constant HcFmNumber
 $40	constant HcPeriodicStart
 $44	constant HcLSThreshold
 
+$54	constant HcRhPortStatus[1]
+\ fields in the HcRhPortStatus[xxx] register
+	0 bit constant CCS	\ current connection status
+	1 bit constant PES	\ port enable status
+	2 bit constant PSS	\ port suspend status
+	3 bit constant POCI	\ port overcurrent indicator
+	4 bit constant PRS	\ port reset status
+
+	8 bit constant PPS	\ port power status
+	9 bit constant LSDA	\ low-speed device attached
+
+	16 bit constant CSC	\ conneciton status change
+	17 bit constant PESC	\ port enable status change
+	18 bit constant PSSC	\ port suspend status change
+	19 bit constant OCIC	\ port overcurrent indication change
+	20 bit constant PRSC	\ current connection status
