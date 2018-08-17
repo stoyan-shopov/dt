@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)https://wiki.osdev.org/Serial_Ports -->
+<html lang="en" dir="ltr" class="client-js"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Serial Ports - OSDev Wiki</title>
+
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="./Serial Ports - OSDev Wiki_files/load.php">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="./Serial Ports - OSDev Wiki_files/load(1).php">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="./Serial Ports - OSDev Wiki_files/load(2).php"></script><script src="./Serial Ports - OSDev Wiki_files/load(3).php"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "Serial_Ports", "wgTitle": "Serial Ports", "wgCurRevisionId": 21740, "wgArticleId": 1662, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["Network Hardware", "Common Devices"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="./Serial Ports - OSDev Wiki_files/load(4).php"></script>
+<style type="text/css">/*<![CDATA[*/
+.source-c {line-height: normal;}
+.source-c li, .source-c pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for c
+ * CSS class: source-c, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.c.source-c .de1, .c.source-c .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.c.source-c  {font-family:monospace;}
+.c.source-c .imp {font-weight: bold; color: red;}
+.c.source-c li, .c.source-c .li1 {font-weight: normal; vertical-align:top;}
+.c.source-c .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.c.source-c .li2 {font-weight: bold; vertical-align:top;}
+.c.source-c .kw1 {color: #b1b100;}
+.c.source-c .kw2 {color: #000000; font-weight: bold;}
+.c.source-c .kw3 {color: #000066;}
+.c.source-c .kw4 {color: #993333;}
+.c.source-c .co1 {color: #666666; font-style: italic;}
+.c.source-c .co2 {color: #339933;}
+.c.source-c .coMULTI {color: #808080; font-style: italic;}
+.c.source-c .es0 {color: #000099; font-weight: bold;}
+.c.source-c .es1 {color: #000099; font-weight: bold;}
+.c.source-c .es2 {color: #660099; font-weight: bold;}
+.c.source-c .es3 {color: #660099; font-weight: bold;}
+.c.source-c .es4 {color: #660099; font-weight: bold;}
+.c.source-c .es5 {color: #006699; font-weight: bold;}
+.c.source-c .br0 {color: #009900;}
+.c.source-c .sy0 {color: #339933;}
+.c.source-c .st0 {color: #ff0000;}
+.c.source-c .nu0 {color: #0000dd;}
+.c.source-c .nu6 {color: #208080;}
+.c.source-c .nu8 {color: #208080;}
+.c.source-c .nu12 {color: #208080;}
+.c.source-c .nu16 {color:#800080;}
+.c.source-c .nu17 {color:#800080;}
+.c.source-c .nu18 {color:#800080;}
+.c.source-c .nu19 {color:#800080;}
+.c.source-c .me1 {color: #202020;}
+.c.source-c .me2 {color: #202020;}
+.c.source-c .ln-xtra, .c.source-c li.ln-xtra, .c.source-c div.ln-xtra {background-color: #ffc;}
+.c.source-c span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-Serial_Ports action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">Serial Ports</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="https://wiki.osdev.org/Serial_Ports#mw-head">navigation</a>,
+					<a href="https://wiki.osdev.org/Serial_Ports#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div lang="en" dir="ltr" class="mw-content-ltr"><p>Serial ports are a legacy communications port which has pretty much been succeeded by <a href="https://wiki.osdev.org/USB" title="USB" class="mw-redirect">USB</a> and other modern communications technology. However, it is much easier to program than USB, and it is still found in a lot of computers (especially older ones such as the ones the financially limited amateur OS writer might use for <a href="https://wiki.osdev.org/Testing" title="Testing">testing</a>). Also, a lot of phone modems connect via the serial interface. Furthermore, it is possible to use the serial ports for debugging, since a lot of emulators allow the redirection of their output into a file.
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="https://wiki.osdev.org/Serial_Ports#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="https://wiki.osdev.org/Serial_Ports#Wires.2C_Pins.2C_Connectors_and_the_like"><span class="tocnumber">1</span> <span class="toctext">Wires, Pins, Connectors and the like</span></a></li>
+<li class="toclevel-1 tocsection-2"><a href="https://wiki.osdev.org/Serial_Ports#Why_Use_a_Serial_Port.3F"><span class="tocnumber">2</span> <span class="toctext">Why Use a Serial Port?</span></a></li>
+<li class="toclevel-1 tocsection-3"><a href="https://wiki.osdev.org/Serial_Ports#Programming_the_Serial_Communications_Port"><span class="tocnumber">3</span> <span class="toctext">Programming the Serial Communications Port</span></a>
+<ul>
+<li class="toclevel-2 tocsection-4"><a href="https://wiki.osdev.org/Serial_Ports#Port_Addresses"><span class="tocnumber">3.1</span> <span class="toctext">Port Addresses</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="https://wiki.osdev.org/Serial_Ports#Line_Protocol"><span class="tocnumber">3.2</span> <span class="toctext">Line Protocol</span></a>
+<ul>
+<li class="toclevel-3 tocsection-6"><a href="https://wiki.osdev.org/Serial_Ports#Baud_Rate"><span class="tocnumber">3.2.1</span> <span class="toctext">Baud Rate</span></a></li>
+<li class="toclevel-3 tocsection-7"><a href="https://wiki.osdev.org/Serial_Ports#Data_Bits"><span class="tocnumber">3.2.2</span> <span class="toctext">Data Bits</span></a></li>
+<li class="toclevel-3 tocsection-8"><a href="https://wiki.osdev.org/Serial_Ports#Stop_bits"><span class="tocnumber">3.2.3</span> <span class="toctext">Stop bits</span></a></li>
+<li class="toclevel-3 tocsection-9"><a href="https://wiki.osdev.org/Serial_Ports#Parity"><span class="tocnumber">3.2.4</span> <span class="toctext">Parity</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-10"><a href="https://wiki.osdev.org/Serial_Ports#Interrupt_enable_register"><span class="tocnumber">3.3</span> <span class="toctext">Interrupt enable register</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-11"><a href="https://wiki.osdev.org/Serial_Ports#Example_Code"><span class="tocnumber">4</span> <span class="toctext">Example Code</span></a>
+<ul>
+<li class="toclevel-2 tocsection-12"><a href="https://wiki.osdev.org/Serial_Ports#Initialization"><span class="tocnumber">4.1</span> <span class="toctext">Initialization</span></a></li>
+<li class="toclevel-2 tocsection-13"><a href="https://wiki.osdev.org/Serial_Ports#Receiving_data"><span class="tocnumber">4.2</span> <span class="toctext">Receiving data</span></a></li>
+<li class="toclevel-2 tocsection-14"><a href="https://wiki.osdev.org/Serial_Ports#Sending_data"><span class="tocnumber">4.3</span> <span class="toctext">Sending data</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-15"><a href="https://wiki.osdev.org/Serial_Ports#Glossary"><span class="tocnumber">5</span> <span class="toctext">Glossary</span></a></li>
+<li class="toclevel-1 tocsection-16"><a href="https://wiki.osdev.org/Serial_Ports#Related_Links"><span class="tocnumber">6</span> <span class="toctext">Related Links</span></a></li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Wires.2C_Pins.2C_Connectors_and_the_like"> Wires, Pins, Connectors and the like </span></h2>
+<p>The Wikipedia page on <a href="http://wikipedia.org/wiki/Serial_port" class="extiw" title="wikipedia:Serial port">Serial ports</a> has a lot of information, and it is summarised here. The serial interface is very simple. There are actually two kinds of serial port: 25-pin and 9-pin. 25-pin ports are not any better, they just have more pins and are bigger. 9-pin is smaller and is used more often though in the past the 25-pin ones were used more often. The 9-pin ones are called DE-9 (or more commonly, DB-9 even though DE-9 is its technical name) and the 25-pin ones are called DB-25. They plug in to your computer using a female plug (unless your computer is odd and has a female port, in which case your cable will need a male plug). <a href="http://wikipedia.org/wiki/D-subminiature" class="extiw" title="wikipedia:D-subminiature">This Wikipedia page</a> has more information on the plug used. 
+</p><p>Both have the same basic types of pins. A DB-25 has most of the pins as ground pins, whereas a DE-9 has only a few ground pins. There is a transmitting pin (for sending information away) and a receiving pin (for getting information). Some serial ports can have a duplex mode--that is, they can send and receive simultaneously. There are a few other pins, used for hardware handshaking. In the past, there was no duplex mode, so if a computer wanted to send something it had to tell the other device or computer that it was about to transmit, using one of the hardware handshaking pins. The other thing would then use another handshaking pin to tell it to send whatever it wanted to send. Today there is duplex mode, but the handshaking pins are still used.
+</p><p>If you want to connect two computers, you need two things in your cable:
+</p>
+<ol><li> The cable needs to have two female plugs so it can plug into both computers.
+</li><li> The cable needs to have it's transmit-receive wires and it's handshaking wires switched. This can be done in the cable itself, or as an extension called a <a href="https://wiki.osdev.org/index.php?title=Null_Modem&amp;action=edit&amp;redlink=1" class="new" title="Null Modem (page does not exist)">Null Modem</a>
+</li></ol>
+<p>For serial devices, you don't need to setup the cable this way. The receiving end of the device has the wires switched and it has a female port, which means you can plug a male plug into it.
+</p>
+<h2> <span class="mw-headline" id="Why_Use_a_Serial_Port.3F">Why Use a Serial Port?</span></h2>
+<p>During the early stages of kernel development, you might wonder why you would bother writing a serial driver. There are several reasons why you might:
+</p>
+<dl><dt><a href="https://wiki.osdev.org/GDB" title="GDB">GDB</a> debugging
+</dt><dd>You can use the serial port to connect to a host computer, and use the GDB debugger to debug your operating system. This involves writing a stub for GDB within your OS. Helpful information might be found at <a rel="nofollow" class="external free" href="http://developer.apple.com/documentation/DeveloperTools/gdb/gdb/gdb_18.html">http://developer.apple.com/documentation/DeveloperTools/gdb/gdb/gdb_18.html</a>.
+</dd><dt>Headless console
+</dt><dd>You can operate the computer without a monitor, keyboard or mouse and instead use the serial port as a console using a protocol such as TTY or VT100.
+</dd><dt>External logging
+</dt><dd>When the system itself is in danger of potentially crashing at times, it's nice to get debugging outputs safe to another computer before the test system triple-faults.
+</dd><dt>Networking and File transfers
+</dt><dd>Serial ports are useful for transferring information between systems when other more traditional methods are unavailable.
+</dd></dl>
+<h2> <span class="mw-headline" id="Programming_the_Serial_Communications_Port">Programming the Serial Communications Port</span></h2>
+<p>If you want to use the serial port for communications, you first have to initialize it. You tell it how fast your connection speed between the other computer or device will be (this is called the baud rate)--you must have the same speed as the other device or computer is setup to use, or you will have problems. It is probably safer to use the slower speeds unless you need the faster speeds for some reason, for example if you are playing a multi-player game over a serial connection. You also need to setup the parity type and the number of bits in a character. Once again, your computer must be setup with the same values for these things as the other computer or device has, or communication will not work.
+</p><p>Once you have setup these things, you still need to setup the interrupt handlers. You can poll the port to see if any new things have arrived, or if it's time to send another character, but this slows things down and will not work very well in most real-time applications or multi-threaded environments. In the case of a game, this is not a good idea at all.
+</p><p>You use IRQ #4 for COM ports 1 or 3, and IRQ #3 for COM ports 2 or 4 (you can tell which port sent the interrupt when you receive the interrupt). The IRQ handlers check if you are receiving something, and if so they receive the character and handle it somehow, such as placing it into a buffer. They also check if the other side is ready to receive something from you, and if you have something to send, it is sent.
+</p>
+<h3> <span class="mw-headline" id="Port_Addresses">Port Addresses</span></h3>
+<p>The addresses for COM ports can vary depending on how they are connected to the machine and how the BIOS is configured.  Some BIOS configuration utilities allow you to see and set what these are, so if you in doubt for a test machine, this might be a good place to look to get you started.
+</p><p>For the most part, the first two COM ports will be at the addresses specified, the addresses for further COM ports is less reliable.
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> COM Port
+</th>
+<th> IO Port
+</th></tr>
+<tr>
+<td> COM1 </td>
+<td> 0x3F8
+</td></tr>
+<tr>
+<td> COM2 </td>
+<td> 0x2F8
+</td></tr>
+<tr>
+<td> COM3 </td>
+<td> 0x3E8
+</td></tr>
+<tr>
+<td> COM4 </td>
+<td> 0x2E8
+</td></tr></tbody></table>
+<p>You might be able to find the IO port addresses of the COM ports in the <a href="https://wiki.osdev.org/Memory_Map_(x86)#BIOS_Data_Area_.28BDA.29" title="Memory Map (x86)">BIOS Data Area</a>; however be warned that this won't work on modern/UEFI systems, can tell you about serial ports that only exist in the chipset (and lack any kind of connector that anything can be plugged into), won't tell you about any additional serial ports (e.g. on expansion cards, etc) that firmware doesn't/can't know about, and will make your OS susceptible to "BIOS quirks/bugs". Because the serial ports have relatively standard IO ports it's far more effective to use manual probing techniques instead; specifically, see if the scratch pad register can store a value, then try the loopback test (that you should use to determine if the serial port is faulty anyway).
+</p><p>Once you have the base address of your COM port, you add an offset value to get to one of the data registers.  One of the registers hold what is termed the DLAB or Divisor Latch Access Bit.  When this bit is set, offsets 0 and 1 are mapped to the low and high bytes of the Divisor register for setting the baud rate of the port.  When this bit is clear, offsets 0 and 1 are mapped to their normal registers.  The DLAB bit only affects port offsets 0 and 1, the other offsets ignore this setting.
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> IO Port Offset
+</th>
+<th> Setting of DLAB
+</th>
+<th> Register mapped to this port
+</th></tr>
+<tr>
+<td> +0 </td>
+<td> 0 </td>
+<td> Data register.  Reading this registers read from the Receive buffer.  Writing to this register writes to the Transmit buffer.
+</td></tr>
+<tr>
+<td> +1 </td>
+<td> 0 </td>
+<td> Interrupt Enable Register.
+</td></tr>
+<tr>
+<td> +0 </td>
+<td> 1 </td>
+<td> With DLAB set to 1, this is the least significant byte of the divisor value for setting the baud rate.
+</td></tr>
+<tr>
+<td> +1 </td>
+<td> 1 </td>
+<td> With DLAB set to 1, this is the most significant byte of the divisor value.
+</td></tr>
+<tr>
+<td> +2 </td>
+<td> - </td>
+<td> Interrupt Identification and FIFO control registers
+</td></tr>
+<tr>
+<td> +3 </td>
+<td> - </td>
+<td> Line Control Register.  The most significant bit of this register is the DLAB.
+</td></tr>
+<tr>
+<td> +4 </td>
+<td> - </td>
+<td> Modem Control Register.
+</td></tr>
+<tr>
+<td> +5 </td>
+<td> - </td>
+<td> Line Status Register.
+</td></tr>
+<tr>
+<td> +6 </td>
+<td> - </td>
+<td> Modem Status Register.
+</td></tr>
+<tr>
+<td> +7 </td>
+<td> - </td>
+<td> Scratch Register.
+</td></tr></tbody></table>
+<h3> <span class="mw-headline" id="Line_Protocol">Line Protocol</span></h3>
+<p>The serial data transmitted across the wire can have a number of different parameters set.  As a rule, the sending device and the receiving device require the same protocol parameter values written to each serial controller in order for communication to be successful.
+</p><p>These days you could consider 8N1 (8 bits, no parity, one stop bit) pretty much the default.
+</p>
+<h4> <span class="mw-headline" id="Baud_Rate">Baud Rate</span></h4>
+<p>The serial controller (UART) has an internal clock which runs at 115200 ticks per second and a clock divisor which is used to control the baud rate.  This is exactly the same type of system used by the Programmable Interrupt Timer (PIT).
+</p><p>In order to set the speed of the port, calculate the divisor required for the given baud rate and program that in to the divisor register.  For example, a divisor of 1 will give 115200 baud, a divisor of 2 will give 57600 baud, 3 will give 38400 baud, etc.
+</p><p>Do not be tempted to use a divisor of 0 to try to get an infinite baud rate, it won't work.  Most serial controllers will generate a unspecified and unpredictable baud rate (and anyway infinite baud would mean infinite transmission errors as they are proportional.)
+</p><p>To set the divisor to the controller:
+</p>
+<ol><li> Set the most significant bit of the Line Control Register.  This is the DLAB bit, and allows access to the divisor registers.
+</li><li> Send the least significant byte of the divisor value to [PORT + 0].
+</li><li> Send the most significant byte of the divisor value to [PORT + 1].
+</li><li> Clear the most significant bit of the Line Control Register.
+</li></ol>
+<h4> <span class="mw-headline" id="Data_Bits">Data Bits</span></h4>
+<p>The number of bits in a character is variable. Having fewer bits is, of course, faster, but they store less information. If you are only sending ASCII text, you probably only need 7 bits.
+</p><p>Set this value by writing to the two least significant bits of the Line Control Register [PORT + 3].
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> Bit 1
+</th>
+<th> Bit 0
+</th>
+<th> Character Length (bits)
+</th></tr>
+<tr>
+<td> 0 </td>
+<td> 0 </td>
+<td> 5
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 1 </td>
+<td> 6
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 0 </td>
+<td> 7
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 1 </td>
+<td> 8
+</td></tr></tbody></table>
+<h4> <span class="mw-headline" id="Stop_bits">Stop bits</span></h4>
+<p>The serial controller can be configured to send a number of bits after each character of data.  These reliable bits can be used to by the controller to verify that the sending and receiving devices are in phase.
+</p><p>If the character length is specifically 5 bits, the stop bits can only be set to 1 or 1.5.  For other character lengths, the stop bits can only be set to 1 or 2.
+</p><p>To set the number of stop bits, set bit 2 of the Line Control Register [PORT + 3].
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> Bit 2
+</th>
+<th> Stop bits
+</th></tr>
+<tr>
+<td> 0 </td>
+<td> 1
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 1.5 / 2 (depending on character length)
+</td></tr></tbody></table>
+<h4> <span class="mw-headline" id="Parity">Parity</span></h4>
+<p>The controller can be made to add or expect a parity bit at the end of each character of data transmitted.  With this parity bit, if a single bit of data is inverted by interference, a parity error can be raised.  The parity type can be NONE, EVEN, ODD, MARK or SPACE.
+</p><p>If parity is set to NONE, no parity bit will be added and none will be expected.  If one is sent by the transmitter and not expected by the receiver, it will likely cause an error.
+</p><p>If the parity is MARK or SPACE, the parity bit will be expected to be always set to 1 or 0 respectively.
+</p><p>If the parity is set to EVEN or ODD, the controller calculates the accuracy of the parity by adding together the values of all the data bits and the parity bit.  If the port is set to have EVEN parity, the result must be even.  If it is set to have ODD parity, the result must be odd.
+</p><p>To set the port parity, set bits 3, 4 and 5 of the Line Control Register [PORT + 3].
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> Bit 5
+</th>
+<th> Bit 4
+</th>
+<th> Bit 3
+</th>
+<th> Parity
+</th></tr>
+<tr>
+<td> - </td>
+<td> - </td>
+<td> 0 </td>
+<td> NONE
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 0 </td>
+<td> 1 </td>
+<td> ODD
+</td></tr>
+<tr>
+<td> 0 </td>
+<td> 1 </td>
+<td> 1 </td>
+<td> EVEN
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 0 </td>
+<td> 1 </td>
+<td> MARK
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> 1 </td>
+<td> 1 </td>
+<td> SPACE
+</td></tr></tbody></table>
+<h3> <span class="mw-headline" id="Interrupt_enable_register">Interrupt enable register</span></h3>
+<p>To communicate with a serial port in interrupt mode, the interrupt-enable-register (see table above) must be set correctly. To determine which interrupts should be enabled, a value with the following bits (0 = disabled, 1 = enabled) must be written to the interrupt-enable-register:
+</p>
+<table border="2" cellpadding="4" cellspacing="0" style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}">
+<tbody><tr>
+<th> Bit
+</th>
+<th> Interrupt
+</th></tr>
+<tr>
+<td> 0 </td>
+<td> Data available
+</td></tr>
+<tr>
+<td> 1 </td>
+<td> Transmitter empty
+</td></tr>
+<tr>
+<td> 2 </td>
+<td> Break/error
+</td></tr>
+<tr>
+<td> 3 </td>
+<td> Status change
+</td></tr>
+<tr>
+<td> 4-7 </td>
+<td> Unused
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Example_Code">Example Code</span></h2>
+<h3> <span class="mw-headline" id="Initialization">Initialization</span></h3>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="co2">#define PORT 0x3f8   /* COM1 */</span>
+&nbsp;
+<span class="kw4">void</span> init_serial<span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">1</span><span class="sy0">,</span> <span class="nu12">0x00</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// Disable all interrupts</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">3</span><span class="sy0">,</span> <span class="nu12">0x80</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// Enable DLAB (set baud rate divisor)</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">0</span><span class="sy0">,</span> <span class="nu12">0x03</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// Set divisor to 3 (lo byte) 38400 baud</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">1</span><span class="sy0">,</span> <span class="nu12">0x00</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">//                  (hi byte)</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">3</span><span class="sy0">,</span> <span class="nu12">0x03</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// 8 bits, no parity, one stop bit</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">2</span><span class="sy0">,</span> <span class="nu12">0xC7</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// Enable FIFO, clear them, with 14-byte threshold</span>
+   outb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">4</span><span class="sy0">,</span> <span class="nu12">0x0B</span><span class="br0">)</span><span class="sy0">;</span>    <span class="co1">// IRQs enabled, RTS/DSR set</span>
+<span class="br0">}</span></pre></div></div>
+<p>Notice that the initialization code above writes to [PORT + 1] twice with different values.  This is once to write to the Divisor register along with [PORT + 0] and once to write to the Interrupt register as detailed in the previous section.  The second write to the Line Control register [PORT + 3] clears the DLAB again as well as setting various other bits.
+</p>
+<h3> <span class="mw-headline" id="Receiving_data">Receiving data</span></h3>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">int</span> serial_received<span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span>
+   <span class="kw1">return</span> inb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">5</span><span class="br0">)</span> <span class="sy0">&amp;</span> <span class="nu0">1</span><span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">char</span> read_serial<span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span>
+   <span class="kw1">while</span> <span class="br0">(</span>serial_received<span class="br0">(</span><span class="br0">)</span> <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   <span class="kw1">return</span> inb<span class="br0">(</span>PORT<span class="br0">)</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<h3> <span class="mw-headline" id="Sending_data">Sending data</span></h3>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">int</span> is_transmit_empty<span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span>
+   <span class="kw1">return</span> inb<span class="br0">(</span>PORT <span class="sy0">+</span> <span class="nu0">5</span><span class="br0">)</span> <span class="sy0">&amp;</span> <span class="nu12">0x20</span><span class="sy0">;</span>
+<span class="br0">}</span>
+&nbsp;
+<span class="kw4">void</span> write_serial<span class="br0">(</span><span class="kw4">char</span> a<span class="br0">)</span> <span class="br0">{</span>
+   <span class="kw1">while</span> <span class="br0">(</span>is_transmit_empty<span class="br0">(</span><span class="br0">)</span> <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span><span class="sy0">;</span>
+&nbsp;
+   outb<span class="br0">(</span>PORT<span class="sy0">,</span>a<span class="br0">)</span><span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<h2> <span class="mw-headline" id="Glossary">Glossary</span></h2>
+<dl><dt>Baud Rate
+</dt><dd>is the speed at which the serial line switches between it's two states. This is not equivalent to bps, due to the fact there are start and stop bits. On an 8/N/1 line, 10 baud = 1 byte. Modems are more complex than plain serial lines due to having multiple waveforms, but for the purposes of OSDev this is irrelevant.
+</dd><dt>baud rate divisor
+</dt><dd>fastest rate a serial port can run, the number 115200.
+</dd><dt>stop bits
+</dt><dd>the NULL bit(s) sent between each character to synchronize the transmitter and the receiver.
+</dd><dt>UART
+</dt><dd>for Universal Asynchronous Receiver/Transceiver: the chip that picks a byte a send it bit per bit on the serial line and vice versa.
+</dd></dl>
+<h2> <span class="mw-headline" id="Related_Links"> Related Links </span></h2>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.nondot.org/sabre/os/articles/CommunicationDevices/">OSRC's "communication" section</a>
+</li><li> <a rel="nofollow" class="external text" href="http://www.sci.muni.cz/docs/pc/serport.txt">A summary of the PC serial port (with programming info).</a>, <a rel="nofollow" class="external text" href="http://www.webcitation.org/5ugQv5JOw">An archive of that document</a>
+</li><li> <a rel="nofollow" class="external text" href="http://en.wikibooks.org/wiki/Serial_Programming">A Wikibook about programming the serial port</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 141/1000000
+Post-expand include size: 972/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:1662-0!*!0!!en!*!* and timestamp 20180629053522 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=Serial_Ports&amp;oldid=21740">https://wiki.osdev.org/index.php?title=Serial_Ports&amp;oldid=21740</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Categories</a>: <ul><li><a href="https://wiki.osdev.org/Category:Network_Hardware" title="Category:Network Hardware">Network Hardware</a></li><li><a href="https://wiki.osdev.org/Category:Common_Devices" title="Category:Common Devices">Common Devices</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=Serial_Ports" title="You are encouraged to log in; however, it is not mandatory [alt-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/Serial_Ports" title="View the content page [alt-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.osdev.org/Talk:Serial_Ports" title="Discussion about the content page [alt-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="https://wiki.osdev.org/Serial_Ports#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/Serial_Ports">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=Serial_Ports&amp;action=edit" title="This page is protected.
+You can view its source [alt-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=Serial_Ports&amp;action=history" title="Past revisions of this page [alt-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="https://wiki.osdev.org/Serial_Ports#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="https://wiki.osdev.org/index.php" id="searchform">
+		<input type="hidden" name="title" value="Special:Search">
+				<input type="search" name="search" title="Search OSDev Wiki [alt-f]" accesskey="f" id="searchInput">		<input type="submit" name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton">		<input type="submit" name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/Serial_Ports" title="A list of all wiki pages that link here [alt-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/Serial_Ports" title="Recent changes in pages linked from this page [alt-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=Serial_Ports&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=Serial_Ports&amp;oldid=21740" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+<div class="portal" id="p-lang">
+	<h5>In other languages</h5>
+	<div class="body">
+		<ul>
+			<li class="interwiki-de"><a href="http://www.lowlevel.eu/wiki/Serielle_Schnittstelle" title="Serielle Schnittstelle">Deutsch</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 22 November 2017, at 14:21.</li>
+											<li id="footer-info-viewcount">This page has been accessed 103,660 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="http://www.mediawiki.org/"><img src="./Serial Ports - OSDev Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="./Serial Ports - OSDev Wiki_files/load(5).php"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="./Serial Ports - OSDev Wiki_files/load(6).php"></script>
+<script src="./Serial Ports - OSDev Wiki_files/load(7).php"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.039 secs. -->
+	
+
+</body></html>

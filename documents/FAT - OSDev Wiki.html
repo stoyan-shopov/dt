@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html dir="ltr" class="client-js" lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>FAT - OSDev Wiki</title>
+<meta charset="UTF-8">
+<meta name="generator" content="MediaWiki 1.18.0">
+<link rel="shortcut icon" href="https://wiki.osdev.org/favicon.ico">
+<link rel="search" type="application/opensearchdescription+xml" href="https://wiki.osdev.org/opensearch_desc.php" title="OSDev Wiki (en)">
+<link rel="EditURI" type="application/rsd+xml" href="https://wiki.osdev.org/api.php?action=rsd">
+<link rel="alternate" type="application/atom+xml" title="OSDev Wiki Atom feed" href="https://wiki.osdev.org/index.php?title=Special:RecentChanges&amp;feed=atom">
+<link rel="stylesheet" href="FAT%20-%20OSDev%20Wiki_files/load.css">
+<style type="text/css" media="all">.mw-collapsible-toggle{float:right} li .mw-collapsible-toggle{float:none} .mw-collapsible-toggle-li{list-style:none}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:4250852ed2349a0d4d0fc6509a3e7d4c */
+</style><style type="text/css" media="all">.js-messagebox{margin:1em 5%;padding:0.5em 2.5%;border:1px solid #ccc;background-color:#fcfcfc;font-size:0.8em}.js-messagebox .js-messagebox-group{margin:1px;padding:0.5em 2.5%;border-bottom:1px solid #ddd}.js-messagebox .js-messagebox-group:last-child{border-bottom:thin none transparent}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:8b08bdc91c52a9ffba396dccfb5b473c */
+</style><meta name="ResourceLoaderDynamicStyles" content="">
+<link rel="stylesheet" href="FAT%20-%20OSDev%20Wiki_files/load_002.css">
+<style>a:lang(ar),a:lang(ckb),a:lang(fa),a:lang(kk-arab),a:lang(mzn),a:lang(ps),a:lang(ur){text-decoration:none}a.new,#quickbar a.new{color:#ba0000}
+
+/* cache key: wikidb:resourceloader:filter:minify-css:4:c88e2bcd56513749bec09a7e29cb3ffa */
+</style>
+<script src="FAT%20-%20OSDev%20Wiki_files/load_006.php"></script><script src="FAT%20-%20OSDev%20Wiki_files/load.php"></script>
+<script>if(window.mw){
+	mw.config.set({"wgCanonicalNamespace": "", "wgCanonicalSpecialPageName": false, "wgNamespaceNumber": 0, "wgPageName": "FAT", "wgTitle": "FAT", "wgCurRevisionId": 21091, "wgArticleId": 1506, "wgIsArticle": true, "wgAction": "view", "wgUserName": null, "wgUserGroups": ["*"], "wgCategories": ["Filesystems"], "wgBreakFrames": false, "wgRestrictionEdit": [], "wgRestrictionMove": []});
+}
+</script><script>if(window.mw){
+	mw.loader.load(["mediawiki.page.startup"]);
+}
+</script><script type="text/javascript" src="FAT%20-%20OSDev%20Wiki_files/load_003.php"></script>
+<style type="text/css">/*<![CDATA[*/
+.source-c {line-height: normal;}
+.source-c li, .source-c pre {
+	line-height: normal; border: 0px none white;
+}
+/**
+ * GeSHi Dynamically Generated Stylesheet
+ * --------------------------------------
+ * Dynamically generated stylesheet for c
+ * CSS class: source-c, CSS id: 
+ * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+ * (http://qbnz.com/highlighter/ and http://geshi.org/)
+ * --------------------------------------
+ */
+.c.source-c .de1, .c.source-c .de2 {font: normal normal 1em/1.2em monospace; margin:0; padding:0; background:none; vertical-align:top;}
+.c.source-c  {font-family:monospace;}
+.c.source-c .imp {font-weight: bold; color: red;}
+.c.source-c li, .c.source-c .li1 {font-weight: normal; vertical-align:top;}
+.c.source-c .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+.c.source-c .li2 {font-weight: bold; vertical-align:top;}
+.c.source-c .kw1 {color: #b1b100;}
+.c.source-c .kw2 {color: #000000; font-weight: bold;}
+.c.source-c .kw3 {color: #000066;}
+.c.source-c .kw4 {color: #993333;}
+.c.source-c .co1 {color: #666666; font-style: italic;}
+.c.source-c .co2 {color: #339933;}
+.c.source-c .coMULTI {color: #808080; font-style: italic;}
+.c.source-c .es0 {color: #000099; font-weight: bold;}
+.c.source-c .es1 {color: #000099; font-weight: bold;}
+.c.source-c .es2 {color: #660099; font-weight: bold;}
+.c.source-c .es3 {color: #660099; font-weight: bold;}
+.c.source-c .es4 {color: #660099; font-weight: bold;}
+.c.source-c .es5 {color: #006699; font-weight: bold;}
+.c.source-c .br0 {color: #009900;}
+.c.source-c .sy0 {color: #339933;}
+.c.source-c .st0 {color: #ff0000;}
+.c.source-c .nu0 {color: #0000dd;}
+.c.source-c .nu6 {color: #208080;}
+.c.source-c .nu8 {color: #208080;}
+.c.source-c .nu12 {color: #208080;}
+.c.source-c .nu16 {color:#800080;}
+.c.source-c .nu17 {color:#800080;}
+.c.source-c .nu18 {color:#800080;}
+.c.source-c .nu19 {color:#800080;}
+.c.source-c .me1 {color: #202020;}
+.c.source-c .me2 {color: #202020;}
+.c.source-c .ln-xtra, .c.source-c li.ln-xtra, .c.source-c div.ln-xtra {background-color: #ffc;}
+.c.source-c span.xtra { display:block; }
+
+/*]]>*/
+</style>
+<style type="text/css">/*<![CDATA[*/
+@import "/index.php?title=MediaWiki:Geshi.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+/*]]>*/
+</style><!--[if lt IE 7]><style type="text/css">body{behavior:url("/skins/vector/csshover.min.htc")}</style><![endif]--></head>
+<body class="mediawiki ltr sitedir-ltr ns-0 ns-subject page-FAT action-view skin-vector">
+		<div id="mw-page-base" class="noprint"></div>
+		<div id="mw-head-base" class="noprint"></div>
+		<!-- content -->
+		<div id="content">
+			<a id="top"></a>
+			<div id="mw-js-message" style="display:none;" class="js-messagebox"></div>
+						<!-- firstHeading -->
+			<h1 id="firstHeading" class="firstHeading">FAT</h1>
+			<!-- /firstHeading -->
+			<!-- bodyContent -->
+			<div id="bodyContent">
+								<!-- tagline -->
+				<div id="siteSub">From OSDev Wiki</div>
+				<!-- /tagline -->
+								<!-- subtitle -->
+				<div id="contentSub"></div>
+				<!-- /subtitle -->
+																<!-- jumpto -->
+				<div id="jump-to-nav">
+					Jump to: <a href="#mw-head">navigation</a>,
+					<a href="#p-search">search</a>
+				</div>
+				<!-- /jumpto -->
+								<!-- bodycontent -->
+				<div dir="ltr" class="mw-content-ltr" lang="en"><table style="font-size:95%; line-height:1.5em; padding:0.25em; float:right; margin: 0 0 8px 15px; clear: right; border:1px solid #aaaaaa; background:#eee; text-align:center; width:200px;&nbsp;;"><tbody><tr><th style="background:#ffce7b; padding:0.3em; font-size:1.1em;"><a href="https://wiki.osdev.org/File_Systems" title="File Systems">Filesystems</a></th></tr><tr><th>Virtual Filesystems</th></tr><tr><td><div>
+<p><a href="https://wiki.osdev.org/VFS" title="VFS">VFS</a><br>
+</p>
+</div></td></tr><tr><th>Disk Filesystems</th></tr><tr><td><div>
+<p><strong class="selflink">FAT</strong> <a href="https://wiki.osdev.org/FAT12" title="FAT12" class="mw-redirect">12</a>/<a href="https://wiki.osdev.org/FAT16" title="FAT16" class="mw-redirect">16</a>/<a href="https://wiki.osdev.org/FAT32" title="FAT32" class="mw-redirect">32</a>, <a href="https://wiki.osdev.org/VFAT" title="VFAT" class="mw-redirect">VFAT</a><br>
+<a href="https://wiki.osdev.org/Ext2" title="Ext2">Ext 2</a>/<a href="https://wiki.osdev.org/Ext3" title="Ext3">3</a>/<a href="https://wiki.osdev.org/Ext4" title="Ext4">4</a><br>
+<a href="https://wiki.osdev.org/LEAN" title="LEAN">LEAN</a><br>
+<a href="https://wiki.osdev.org/HPFS" title="HPFS">HPFS</a><br>
+<a href="https://wiki.osdev.org/NTFS" title="NTFS">NTFS</a><br>
+<a href="https://wiki.osdev.org/HFS" title="HFS">HFS</a><br>
+<a href="https://wiki.osdev.org/HFS%2B" title="HFS+">HFS+</a><br>
+<a href="https://wiki.osdev.org/MFS" title="MFS">MFS</a><br>
+<a href="https://wiki.osdev.org/ReiserFS" title="ReiserFS">ReiserFS</a><br>
+<a href="https://wiki.osdev.org/FFS_(Amiga)" title="FFS (Amiga)">FFS (Amiga)</a><br>
+<a href="https://wiki.osdev.org/FFS_(BSD)" title="FFS (BSD)" class="mw-redirect">FFS (BSD)</a>/<a href="https://wiki.osdev.org/UFS" title="UFS">UFS</a><br>
+<a href="https://wiki.osdev.org/BeFS" title="BeFS">BeFS</a><br>
+<a href="https://wiki.osdev.org/BFS" title="BFS">BFS</a><br>
+<a href="https://wiki.osdev.org/XFS" title="XFS">XFS</a><br>
+<a href="https://wiki.osdev.org/SFS" title="SFS">SFS</a><br>
+<a href="https://wiki.osdev.org/ZFS" title="ZFS">ZFS</a><br>
+<a href="https://wiki.osdev.org/USTAR" title="USTAR">USTAR</a><br>
+</p>
+</div></td></tr><tr><th>CD/DVD Filesystems</th></tr><tr><td><div>
+<p><a href="https://wiki.osdev.org/ISO_9660" title="ISO 9660">ISO 9660</a><br>
+<a href="https://wiki.osdev.org/Joliet" title="Joliet">Joliet</a><br>
+<a href="https://wiki.osdev.org/UDF" title="UDF">UDF</a><br>
+</p>
+</div></td></tr><tr><th><a href="https://wiki.osdev.org/Category:Network_Filesystems" title="Category:Network Filesystems">Network Filesystems</a></th></tr><tr><td><div>
+<p><a href="https://wiki.osdev.org/NFS" title="NFS">NFS</a><br>
+<a href="https://wiki.osdev.org/RFS" title="RFS">RFS</a><br>
+<a href="https://wiki.osdev.org/AFS" title="AFS">AFS</a><br>
+</p>
+</div></td></tr><tr><th>Flash Filesystems</th></tr><tr><td><div>
+<p><a href="https://wiki.osdev.org/JFFS2" title="JFFS2">JFFS2</a><br>
+<a href="https://wiki.osdev.org/YAFFS" title="YAFFS">YAFFS</a><br>
+</p>
+</div></td></tr></tbody></table>
+<p>The <b>File Allocation Table</b> (<b>FAT</b>) file system was 
+introduced with DOS v1.0 (and possibly CP/M). Supposedly written by Bill
+ Gates, FAT is a very simple file system -- nothing more than a 
+singly-linked list of clusters in a gigantic table. A FAT file system 
+uses very little memory (unless the OS caches the whole allocation table
+ in memory) and is one of, if not the, most basic file system in use 
+today.
+</p>
+<table id="toc" class="toc"><tbody><tr><td><div id="toctitle"><h2>Contents</h2><span class="toctoggle">&nbsp;[<a href="#" class="internal" id="togglelink">hide</a>]&nbsp;</span></div>
+<ul>
+<li class="toclevel-1 tocsection-1"><a href="#Overview"><span class="tocnumber">1</span> <span class="toctext">Overview</span></a>
+<ul>
+<li class="toclevel-2 tocsection-2"><a href="#FAT_12"><span class="tocnumber">1.1</span> <span class="toctext">FAT 12</span></a></li>
+<li class="toclevel-2 tocsection-3"><a href="#FAT_16"><span class="tocnumber">1.2</span> <span class="toctext">FAT 16</span></a></li>
+<li class="toclevel-2 tocsection-4"><a href="#FAT_32"><span class="tocnumber">1.3</span> <span class="toctext">FAT 32</span></a></li>
+<li class="toclevel-2 tocsection-5"><a href="#ExFAT"><span class="tocnumber">1.4</span> <span class="toctext">ExFAT</span></a></li>
+<li class="toclevel-2 tocsection-6"><a href="#VFAT"><span class="tocnumber">1.5</span> <span class="toctext">VFAT</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-7"><a href="#Implementation_Details"><span class="tocnumber">2</span> <span class="toctext">Implementation Details</span></a>
+<ul>
+<li class="toclevel-2 tocsection-8"><a href="#Boot_Record"><span class="tocnumber">2.1</span> <span class="toctext">Boot Record</span></a>
+<ul>
+<li class="toclevel-3 tocsection-9"><a href="#BPB_.28BIOS_Parameter_Block.29"><span class="tocnumber">2.1.1</span> <span class="toctext">BPB (BIOS Parameter Block)</span></a></li>
+<li class="toclevel-3 tocsection-10"><a href="#Extended_Boot_Record"><span class="tocnumber">2.1.2</span> <span class="toctext">Extended Boot Record</span></a>
+<ul>
+<li class="toclevel-4 tocsection-11"><a href="#FAT_12_and_FAT_16"><span class="tocnumber">2.1.2.1</span> <span class="toctext">FAT 12 and FAT 16</span></a></li>
+<li class="toclevel-4 tocsection-12"><a href="#FAT_32_2"><span class="tocnumber">2.1.2.2</span> <span class="toctext">FAT 32</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-13"><a href="#File_Allocation_Table"><span class="tocnumber">2.2</span> <span class="toctext">File Allocation Table</span></a>
+<ul>
+<li class="toclevel-3 tocsection-14"><a href="#FAT_12_2"><span class="tocnumber">2.2.1</span> <span class="toctext">FAT 12</span></a></li>
+<li class="toclevel-3 tocsection-15"><a href="#FAT_16_2"><span class="tocnumber">2.2.2</span> <span class="toctext">FAT 16</span></a></li>
+<li class="toclevel-3 tocsection-16"><a href="#FAT_32_3"><span class="tocnumber">2.2.3</span> <span class="toctext">FAT 32</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2 tocsection-17"><a href="#Directories"><span class="tocnumber">2.3</span> <span class="toctext">Directories</span></a>
+<ul>
+<li class="toclevel-3 tocsection-18"><a href="#Standard_8.3_format"><span class="tocnumber">2.3.1</span> <span class="toctext">Standard 8.3 format</span></a></li>
+<li class="toclevel-3 tocsection-19"><a href="#Long_File_Names"><span class="tocnumber">2.3.2</span> <span class="toctext">Long File Names</span></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-20"><a href="#Programming_Guide"><span class="tocnumber">3</span> <span class="toctext">Programming Guide</span></a>
+<ul>
+<li class="toclevel-2 tocsection-21"><a href="#Reading_the_Boot_Sector"><span class="tocnumber">3.1</span> <span class="toctext">Reading the Boot Sector</span></a></li>
+<li class="toclevel-2 tocsection-22"><a href="#Reading_Directories"><span class="tocnumber">3.2</span> <span class="toctext">Reading Directories</span></a></li>
+<li class="toclevel-2 tocsection-23"><a href="#Following_Cluster_Chains"><span class="tocnumber">3.3</span> <span class="toctext">Following Cluster Chains</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1 tocsection-24"><a href="#Creating_a_fresh_FAT_filesystem"><span class="tocnumber">4</span> <span class="toctext">Creating a fresh FAT filesystem</span></a></li>
+<li class="toclevel-1 tocsection-25"><a href="#See_Also"><span class="tocnumber">5</span> <span class="toctext">See Also</span></a>
+<ul>
+<li class="toclevel-2 tocsection-26"><a href="#Threads"><span class="tocnumber">5.1</span> <span class="toctext">Threads</span></a></li>
+<li class="toclevel-2 tocsection-27"><a href="#External_Links"><span class="tocnumber">5.2</span> <span class="toctext">External Links</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></tbody></table>
+<h2> <span class="mw-headline" id="Overview"> Overview </span></h2>
+<p>There are several different versions of the FAT file system. Each version was designed for a different size of storage media. 
+</p>
+<h3> <span class="mw-headline" id="FAT_12"> FAT 12 </span></h3>
+<p>FAT 12 was designed for floppy disks and can manage a maximum size of
+ 16 megabytes because it uses 12 bits to address the clusters.
+</p>
+<h3> <span class="mw-headline" id="FAT_16"> FAT 16 </span></h3>
+<p>FAT 16 was designed for early hard disks and could handle a maximum 
+size of 64K clusters * the cluster size. The larger the hard disk, the 
+larger the cluster size would be, which leads to large amounts of "slack
+ space" on the disk.
+</p>
+<h3> <span class="mw-headline" id="FAT_32"> FAT 32 </span></h3>
+<p>FAT 32 was introduced to us by Windows95-B and Windows98. FAT32 
+solved some of FAT's problems. No more 64K max clusters! FAT32 is 
+slightly misnamed, as the top 4 bits of the 32 bit cluster number are 
+reserved, and were never used. If you want to call it FAT28 instead, 
+then as the name suggests, the filesystem can handle a maximum of 256M 
+clusters per partition. This enables very large hard disks to still 
+maintain reasonably small cluster sizes and thus reduce slack space 
+between files.
+</p>
+<h3> <span class="mw-headline" id="ExFAT"> ExFAT </span></h3>
+<dl><dd><i>Main article:</i> <a href="https://wiki.osdev.org/ExFAT" title="ExFAT">ExFAT</a>
+</dd></dl>
+<p>ExFAT is the filesystem used on SDXC cards, created by Microsoft. It 
+is basically FAT32 with actually 32 bits per FAT entry, with minor 
+extensions.
+</p>
+<h3> <span class="mw-headline" id="VFAT"> VFAT </span></h3>
+<p>VFAT is an extension to the FAT file system that has the ability to 
+use long filenames (up to 255 characters). First introduced by Windows 
+95, it uses a "kludge" whereby long filenames are marked with a "volume 
+label" attribute and filenames are subsequently stored in 11 byte chunks
+ in sequential directory entries. (This is a bit of an 
+oversimplification, but close enough).
+</p>
+<h2> <span class="mw-headline" id="Implementation_Details"> Implementation Details </span></h2>
+<p>The FAT file system views the storage media as a flat array of 
+clusters. If the physical media does not address its data as a flat list
+ of sectors (really old hard disks and floppy disks) then the cluster 
+numbers will need to be translated before being sent to the disk. The 
+storage media is organized into three basic areas.
+</p>
+<ul><li> The boot record
+</li><li> The File Allocation Table (FAT)
+</li><li> The directory and data area
+</li></ul>
+<h3> <span class="mw-headline" id="Boot_Record"> Boot Record </span></h3>
+<p>The boot record occupies one sector, and is always placed in logical 
+sector number zero of the "partition". If the media is not divided into 
+partitions, then this is the beginning of the media. This is the easiest
+ sector on the partition for the computer to locate when it is loaded. 
+If the storage media is partitioned (such as a hard disk), then the 
+beginning of the actual media contains an <a href="https://wiki.osdev.org/MBR_(x86)" title="MBR (x86)">MBR (x86)</a> or other form of partition information. In this case each partition's first sector holds a <a href="https://wiki.osdev.org/Volume_Boot_Record" title="Volume Boot Record">Volume Boot Record</a>.
+</p>
+<h4> <span class="mw-headline" id="BPB_.28BIOS_Parameter_Block.29"> BPB (BIOS Parameter Block) </span></h4>
+<p>The boot record contains both code and data, mixed together. The data that isn't code is known as the BPB.
+</p>
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<th> Offset (in bytes)
+</th>
+<th> Size (in bytes)
+</th>
+<th> Meaning
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td> 3
+</td>
+<td>	The first three bytes EB 3C 90 disassemble to JMP SHORT 3C NOP. 
+(The 3C value may be different.) The reason for this is to jump over the
+ disk format information (the BPB and EBPB). Since the first sector of 
+the disk is loaded into ram at location 0x0000:0x7c00 and executed, 
+without this jump, the processor would attempt to execute data that 
+isn't code. Even for non-bootable volumes, code matching this pattern 
+(or using the E9 jump opcode) is required to be present by both Windows 
+and OS X. To fulfil this requirement, an infinite loop can be placed 
+here with the bytes EB FE 90.
+</td></tr>
+<tr>
+<td> 3
+</td>
+<td> 8
+</td>
+<td>	OEM identifier. The first 8 Bytes (3 - 10) is the version of DOS 
+being used. The next eight Bytes 29 3A 63 7E 2D 49 48 and 43 read out 
+the name of the version. The official FAT Specification from Microsoft 
+says that this field is really meaningless and is ignored by MS FAT 
+Drivers, however it does recommend the value "MSWIN4.1" as some 3rd 
+party drivers supposedly check it and expect it to have that value. 
+Older versions of dos also report MSDOS5.1 and linux-formatted floppy 
+will likely to carry "mkdosfs" here. If the string is less than 8 bytes,
+ it is padded with spaces.
+</td></tr>
+<tr>
+<td> 11
+</td>
+<td> 2
+</td>
+<td>	The number of Bytes per sector (remember, all numbers are in the little-endian format).
+</td></tr>
+<tr>
+<td> 13
+</td>
+<td> 1
+</td>
+<td>	Number of sectors per cluster.
+</td></tr>
+<tr>
+<td> 14
+</td>
+<td> 2
+</td>
+<td>	Number of reserved sectors. The boot record sectors are included in this value.
+</td></tr>
+<tr>
+<td> 16
+</td>
+<td> 1
+</td>
+<td>	Number of File Allocation Tables (FAT's) on the storage media. Often this value is 2.
+</td></tr>
+<tr>
+<td> 17
+</td>
+<td> 2
+</td>
+<td>	Number of directory entries (must be set so that the root directory occupies entire sectors).
+</td></tr>
+<tr>
+<td> 19
+</td>
+<td> 2
+</td>
+<td>	The total sectors in the logical volume. If this value is 0, it 
+means there are more than 65535 sectors in the volume, and the actual 
+count is stored in "Large Sectors (bytes 32-35).
+</td></tr>
+<tr>
+<td> 21
+</td>
+<td> 1
+</td>
+<td>	This Byte indicates the <a rel="nofollow" class="external text" href="http://support.microsoft.com/kb/q140418/">media descriptor type</a>.
+</td></tr>
+<tr>
+<td> 22
+</td>
+<td> 2
+</td>
+<td>	Number of sectors per FAT. FAT12/FAT16 only.
+</td></tr>
+<tr>
+<td> 24
+</td>
+<td> 2
+</td>
+<td>	Number of sectors per track.
+</td></tr>
+<tr>
+<td> 26
+</td>
+<td> 2
+</td>
+<td>	Number of heads or sides on the storage media.
+</td></tr>
+<tr>
+<td> 28
+</td>
+<td> 4
+</td>
+<td>	Number of hidden sectors. (i.e. the LBA of the beginning of the partition.)
+</td></tr>
+<tr>
+<td> 32
+</td>
+<td> 4
+</td>
+<td>	Large amount of sector on media. This field is set if there are more than 65535 sectors in the volume.
+</td></tr></tbody></table>
+<p>Note: the "geometry" of the media (sectors per track, heads, and 
+perhaps the number of bytes in a sector) is not necessarily known 
+correctly by the program that originally formats the media. Also, if the
+ media is moved (from the computer that formatted it) to another machine
+ with a different BIOS -- then the new BIOS may specify a different 
+geometry for the same media. So it is generally a very bad idea to trust
+ the "SPT" or "heads" numbers. Get them from the BIOS instead, if 
+possible.
+</p><p>Note2: many of the values in the BPB are not correctly "aligned".
+ That is, word-sized values are not stored on word ("even" address) 
+boundaries. On some architectures, accessing misaligned words may cause 
+the code to crash. Making a copy of the BPB (somewhere else in memory 
+and shifted up one byte) may solve the problem.
+</p>
+<h4> <span class="mw-headline" id="Extended_Boot_Record"> Extended Boot Record </span></h4>
+<p>The extended boot record information comes right after the BPB. The 
+data at the beginning is known as the EBPB. It contains different 
+information depending on whether this partition is a FAT 12, FAT 16, or 
+FAT 32 filesystem. Immediately following the EBPB is the actual boot 
+code, then the standard 0xAA55 boot signature, to fill out the 512-byte 
+boot sector.
+</p>
+<h5> <span class="mw-headline" id="FAT_12_and_FAT_16"> FAT 12 and FAT 16 </span></h5>
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<th> Offset (from the start of the standard boot record)
+</th>
+<th> Length (in bytes)
+</th>
+<th> Meaning
+</th></tr>
+<tr>
+<td> 36
+</td>
+<td> 1
+</td>
+<td>	Drive number. The value here should be identical to the value 
+returned by BIOS interrupt 0x13, or passed in the DL register; i.e. 0x00
+ for a floppy disk and 0x80 for hard disks. This number is useless 
+because the media is likely to be moved to another machine and inserted 
+in a drive with a different drive number.
+</td></tr>
+<tr>
+<td> 37
+</td>
+<td> 1
+</td>
+<td>	Flags in Windows NT. Reserved otherwise.
+</td></tr>
+<tr>
+<td> 38
+</td>
+<td> 1
+</td>
+<td>	Signature (must be 0x28 or 0x29).
+</td></tr>
+<tr>
+<td> 39
+</td>
+<td> 4
+</td>
+<td>       VolumeID 'Serial' number. Used for tracking volumes between computers. You can ignore this if you want.
+</td></tr>
+<tr>
+<td> 43
+</td>
+<td> 11
+</td>
+<td>	Volume label string. This field is padded with spaces.
+</td></tr>
+<tr>
+<td> 54
+</td>
+<td> 8
+</td>
+<td>	System identifier string. This field is a string representation of 
+the FAT file system type. It is padded with spaces. The spec says never 
+to trust the contents of this string for any use.
+</td></tr>
+<tr>
+<td> 62
+</td>
+<td> 448
+</td>
+<td>	Boot code.
+</td></tr>
+<tr>
+<td> 510
+</td>
+<td> 2
+</td>
+<td>	0xAA55 bootable partition signature.
+</td></tr></tbody></table>
+<h5> <span class="mw-headline" id="FAT_32_2"> FAT 32 </span></h5>
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<th> Offset (from the start of the standard boot record)
+</th>
+<th> Length (in bytes)
+</th>
+<th> Meaning
+</th></tr>
+<tr>
+<td> 36
+</td>
+<td> 4
+</td>
+<td>	Sectors per FAT. The size of the FAT in sectors.
+</td></tr>
+<tr>
+<td> 40
+</td>
+<td> 2
+</td>
+<td>	Flags.
+</td></tr>
+<tr>
+<td> 42
+</td>
+<td> 2
+</td>
+<td>       FAT version number. The high byte is the major version and 
+the low byte is the minor version. FAT drivers should respect this 
+field.
+</td></tr>
+<tr>
+<td> 44
+</td>
+<td> 4
+</td>
+<td>	The cluster number of the root directory. Often this field is set to 2.
+</td></tr>
+<tr>
+<td> 48
+</td>
+<td> 2
+</td>
+<td>	The sector number of the FSInfo structure.
+</td></tr>
+<tr>
+<td> 50
+</td>
+<td> 2
+</td>
+<td>       The sector number of the backup boot sector.
+</td></tr>
+<tr>
+<td> 52
+</td>
+<td> 12
+</td>
+<td>       Reserved. When the volume is formated these bytes should be zero.
+</td></tr>
+<tr>
+<td> 64
+</td>
+<td> 1
+</td>
+<td>	Drive number. The values here are identical to the values returned 
+by the BIOS interrupt 0x13. 0x00 for a floppy disk and 0x80 for hard 
+disks.
+</td></tr>
+<tr>
+<td> 65
+</td>
+<td> 1
+</td>
+<td>	Flags in Windows NT. Reserved otherwise.
+</td></tr>
+<tr>
+<td> 66
+</td>
+<td> 1
+</td>
+<td>	Signature (must be 0x28 or 0x29).
+</td></tr>
+<tr>
+<td> 67
+</td>
+<td> 4
+</td>
+<td>       VolumeID 'Serial' number. Used for tracking volumes between computers. You can ignore this if you want.
+</td></tr>
+<tr>
+<td> 71
+</td>
+<td> 11
+</td>
+<td>	Volume label string. This field is padded with spaces.
+</td></tr>
+<tr>
+<td> 82
+</td>
+<td> 8
+</td>
+<td>	System identifier string. Always "FAT32&nbsp;&nbsp;&nbsp;". The 
+spec says never to trust the contents of this string for any use.
+</td></tr>
+<tr>
+<td> 90
+</td>
+<td> 420
+</td>
+<td>	Boot code.
+</td></tr>
+<tr>
+<td> 510
+</td>
+<td> 2
+</td>
+<td>	0xAA55 bootable partition signature.
+</td></tr></tbody></table>
+<h3> <span class="mw-headline" id="File_Allocation_Table"> File Allocation Table </span></h3>
+<p>The File Allocation Table (FAT) is a table stored on the storage 
+media that indicates the status and location of all data clusters that 
+are on the disk. It can be considered the "table of contents" of a disk.
+ The cluster may be available for use, it may be reserved by the 
+operating system, it may be unavailable due to a bad sector on the disk,
+ or it may be in use by a file. The clusters of a file need not be right
+ next to each other on the disk. In fact it is likely that they are 
+scattered widely throughout the disk. The FAT allows the operating 
+system to follow the "chain" of clusters in a file. 
+</p>
+<h4> <span class="mw-headline" id="FAT_12_2"> FAT 12 </span></h4>
+<p>FAT 12 uses 12 bits to address the clusters on the disk. Each 12 bit 
+entry in the FAT points to the next cluster of a file on the disk. Given
+ a valid cluster number, here is how you extract the value of the next 
+cluster in the cluster chain:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">unsigned</span> <span class="kw4">char</span> FAT_table<span class="br0">[</span>sector_size<span class="br0">]</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_offset <span class="sy0">=</span> active_cluster <span class="sy0">+</span> <span class="br0">(</span>active_cluster <span class="sy0">/</span> <span class="nu0">2</span><span class="br0">)</span><span class="sy0">;</span><span class="co1">// multiply by 1.5</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_sector <span class="sy0">=</span> first_fat_sector <span class="sy0">+</span> <span class="br0">(</span>fat_offset <span class="sy0">/</span> section_size<span class="br0">)</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> ent_offset <span class="sy0">=</span> fat_offset <span class="sy0">%</span> section_size<span class="sy0">;</span>
+&nbsp;
+<span class="co1">//at this point you need to read from sector "fat_sector" on the disk into "FAT_table".</span>
+&nbsp;
+<span class="kw4">unsigned</span> <span class="kw4">short</span> table_value <span class="sy0">=</span> <span class="sy0">*</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">short</span><span class="sy0">*</span><span class="br0">)</span><span class="sy0">&amp;</span>FAT_table<span class="br0">[</span>ent_offset<span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+<span class="kw1">if</span><span class="br0">(</span>active_cluster <span class="sy0">&amp;</span> <span class="nu12">0x0001</span><span class="br0">)</span>
+   table_value <span class="sy0">=</span> table_value <span class="sy0">&gt;&gt;</span> <span class="nu0">4</span><span class="sy0">;</span>
+<span class="kw1">else</span>
+   table_value <span class="sy0">=</span> table_value <span class="sy0">&amp;</span> <span class="nu12">0x0FFF</span><span class="sy0">;</span>
+&nbsp;
+<span class="co1">//the variable "table_value" now has the information you need about the next cluster in the chain.</span></pre></div></div>
+<p>If "table_value" is greater than or equal to (&gt;=) 0xFF8 then there
+ are no more clusters in the chain. This means that the whole file has 
+been read. If "table_value" equals (==) 0xFF7 then this cluster has been
+ marked as "bad". "Bad" clusters are prone to errors and should be 
+avoided. If "table_value" is not one of the above cases then it is the 
+cluster number of the next cluster in the file.
+</p><p>Since FAT12 uses an entry size that is not evenly divisible by 8 
+bits, figuring out how to interpret the FAT on a little-endian machine 
+can be slightly confusing. Consider two entries of 0x123 and 0x456 
+back-to-back. On a little-endian machine, the first byte of the first 
+entry is the bottom two nibbles (0x23) and the highest nibble goes into 
+the bottom nibble of the second byte (0x?1). Since the next entry is now
+ starting mid-byte, only the lowest nibble can fit in the byte (0x6?) 
+and the two highest nibbles go into the next byte (0x45). Therefore the 2
+ entries back-to-back look like this: 0x23 0x61 0x45.
+</p>
+<h4> <span class="mw-headline" id="FAT_16_2"> FAT 16 </span></h4>
+<p>FAT 16 uses 16 bits to address the clusters on the disk. Because of 
+this, it is much easier to extract the values out of a 16 bit File 
+Allocation Table. Here is how it is done:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">unsigned</span> <span class="kw4">char</span> FAT_table<span class="br0">[</span>sector_size<span class="br0">]</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_offset <span class="sy0">=</span> active_cluster <span class="sy0">*</span> <span class="nu0">2</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_sector <span class="sy0">=</span> first_fat_sector <span class="sy0">+</span> <span class="br0">(</span>fat_offset <span class="sy0">/</span> sector_size<span class="br0">)</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> ent_offset <span class="sy0">=</span> fat_offset <span class="sy0">%</span> sector_size<span class="sy0">;</span>
+&nbsp;
+<span class="co1">//at this point you need to read from sector "fat_sector" on the disk into "FAT_table".</span>
+&nbsp;
+<span class="kw4">unsigned</span> <span class="kw4">short</span> table_value <span class="sy0">=</span> <span class="sy0">*</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">short</span><span class="sy0">*</span><span class="br0">)</span><span class="sy0">&amp;</span>FAT_table<span class="br0">[</span>ent_offset<span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+<span class="co1">//the variable "table_value" now has the information you need about the next cluster in the chain.</span></pre></div></div>
+<p>If "table_value" is greater than or equal to (&gt;=) 0xFFF8 then 
+there are no more clusters in the chain. This means that the whole file 
+has been read. If "table_value" equals (==) 0xFFF7 then this cluster has
+ been marked as "bad". "Bad" clusters are prone to errors and should be 
+avoided. If "table_value" is not one of the above cases then it is the 
+cluster number of the next cluster in the file.
+</p>
+<h4> <span class="mw-headline" id="FAT_32_3"> FAT 32 </span></h4>
+<p>FAT 32 uses 28 bits to address the clusters on the disk. Yes, that is
+ right. FAT 32 only uses 28 of its 32 bits. The highest 4 bits are 
+reserved. This means that they should be ignored when read and unchanged
+ when written. Besides this small detail, extracting a value from a 32 
+bit FAT is almost identical to the same operation on a 16 bit FAT:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">unsigned</span> <span class="kw4">char</span> FAT_table<span class="br0">[</span>sector_size<span class="br0">]</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_offset <span class="sy0">=</span> active_cluster <span class="sy0">*</span> <span class="nu0">4</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> fat_sector <span class="sy0">=</span> first_fat_sector <span class="sy0">+</span> <span class="br0">(</span>fat_offset <span class="sy0">/</span> sector_size<span class="br0">)</span><span class="sy0">;</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> ent_offset <span class="sy0">=</span> fat_offset <span class="sy0">%</span> sector_size<span class="sy0">;</span>
+&nbsp;
+<span class="co1">//at this point you need to read from sector "fat_sector" on the disk into "FAT_table".</span>
+&nbsp;
+<span class="co1">//remember to ignore the high 4 bits.</span>
+<span class="kw4">unsigned</span> <span class="kw4">int</span> table_value <span class="sy0">=</span> <span class="sy0">*</span><span class="br0">(</span><span class="kw4">unsigned</span> <span class="kw4">int</span><span class="sy0">*</span><span class="br0">)</span><span class="sy0">&amp;</span>FAT_table<span class="br0">[</span>ent_offset<span class="br0">]</span> <span class="sy0">&amp;</span> <span class="nu12">0x0FFFFFFF</span><span class="sy0">;</span>
+&nbsp;
+<span class="co1">//the variable "table_value" now has the information you need about the next cluster in the chain.</span></pre></div></div>
+<p>If "table_value" is greater than or equal to (&gt;=) 0x0FFFFFF8 then 
+there are no more clusters in the chain. This means that the whole file 
+has been read. If "table_value" equals (==) 0x0FFFFFF7 then this cluster
+ has been marked as "bad". "Bad" clusters are prone to errors and should
+ be avoided. If "table_value" is not one of the above cases then it is 
+the cluster number of the next cluster in the file.
+</p>
+<h3> <span class="mw-headline" id="Directories"> Directories </span></h3>
+<p>A directory entry simply stores the information needed to know where a
+ file's data or a folder's children are stored on the disk. It also 
+holds information such as the entry's name, size, and creation time. 
+There are two types of directories in a FAT file system. Standard 8.3 
+directory entries, which appear on all FAT file systems, and Long File 
+Name directory entries which are optionally present to allow for longer 
+file names.
+</p>
+<h4> <span class="mw-headline" id="Standard_8.3_format"> Standard 8.3 format </span></h4>
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<th> Offset (in bytes)
+</th>
+<th> Length (in bytes)
+</th>
+<th> Meaning
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td> 11
+</td>
+<td> 8.3 file name. The first 8 characters are the name and the last 3 are the extension.
+</td></tr>
+<tr>
+<td> 11
+</td>
+<td> 1
+</td>
+<td> Attributes of the file. The possible attributes are: <pre>READ_ONLY=0x01 HIDDEN=0x02 SYSTEM=0x04 VOLUME_ID=0x08 DIRECTORY=0x10 ARCHIVE=0x20 LFN=READ_ONLY|HIDDEN|SYSTEM|VOLUME_ID </pre> (LFN means that this entry is a <a href="#Long_File_Names">long file name entry</a>)
+</td></tr>
+<tr>
+<td> 12
+</td>
+<td> 1
+</td>
+<td> Reserved for use by Windows NT.
+</td></tr>
+<tr>
+<td> 13
+</td>
+<td> 1
+</td>
+<td> Creation time in tenths of a second. Range 0-199 inclusive. Based 
+on simple tests, Ubuntu16.10 stores either 0 or 100 while Windows7 
+stores 0-199 in this field.
+</td></tr>
+<tr>
+<td> 14
+</td>
+<td> 2
+</td>
+<td> The time that the file was created. Multiply Seconds by 2.
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<td> Hour
+</td>
+<td> 5 bits
+</td></tr>
+<tr>
+<td> Minutes
+</td>
+<td> 6 bits
+</td></tr>
+<tr>
+<td> Seconds
+</td>
+<td> 5 bits
+</td></tr></tbody></table>
+</td></tr>
+<tr>
+<td> 16
+</td>
+<td> 2
+</td>
+<td> The date on which the file was created.
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<td> Year
+</td>
+<td> 7 bits
+</td></tr>
+<tr>
+<td> Month
+</td>
+<td> 4 bits
+</td></tr>
+<tr>
+<td> Day
+</td>
+<td> 5 bits
+</td></tr></tbody></table>
+</td></tr>
+<tr>
+<td> 18
+</td>
+<td> 2
+</td>
+<td> Last accessed date. Same format as the creation date.
+</td></tr>
+<tr>
+<td> 20
+</td>
+<td> 2
+</td>
+<td> The high 16 bits of this entry's first cluster number. For FAT 12 and FAT 16 this is always zero.
+</td></tr>
+<tr>
+<td> 22
+</td>
+<td> 2
+</td>
+<td> Last modification time. Same format as the creation time.
+</td></tr>
+<tr>
+<td> 24
+</td>
+<td> 2
+</td>
+<td> Last modification date. Same format as the creation date.
+</td></tr>
+<tr>
+<td> 26
+</td>
+<td> 2
+</td>
+<td> The low 16 bits of this entry's first cluster number. Use this number to find the first cluster for this entry.
+</td></tr>
+<tr>
+<td> 28
+</td>
+<td> 4
+</td>
+<td> The size of the file in bytes.
+</td></tr></tbody></table>
+<h4> <span class="mw-headline" id="Long_File_Names"> Long File Names </span></h4>
+<p>Long file name entries <i>always</i> have a regular 8.3 entry to 
+which they belong. The long file name entries are always placed 
+immediately before their 8.3 entry. Here is the format of a long file 
+name entry.
+</p>
+<table style="margin-top:1em; margin-bottom:1em; background:#f9f9f9; border:1px #aaa solid; border-collapse:collapse; {{{1}}}" cellspacing="0" cellpadding="4" border="2">
+
+<tbody><tr>
+<th> Offset (in bytes)
+</th>
+<th> Length (in bytes)
+</th>
+<th> Meaning
+</th></tr>
+<tr>
+<td> 0
+</td>
+<td> 1
+</td>
+<td> The order of this entry in the sequence of long file name entries. 
+This value helps you to know where in the file's name the characters 
+from this entry should be placed.
+</td></tr>
+<tr>
+<td> 1
+</td>
+<td> 10
+</td>
+<td> The first 5, 2-byte characters of this entry.
+</td></tr>
+<tr>
+<td> 11
+</td>
+<td> 1
+</td>
+<td> Attribute. Always equals 0x0F. (the long file name attribute)
+</td></tr>
+<tr>
+<td> 12
+</td>
+<td> 1
+</td>
+<td> Long entry type. Zero for name entries.
+</td></tr>
+<tr>
+<td> 13
+</td>
+<td> 1
+</td>
+<td> Checksum generated of the short file name when the file was 
+created. The short filename can change without changing the long 
+filename in cases where the partition is mounted on a system which does 
+not support long filenames.
+</td></tr>
+<tr>
+<td> 14
+</td>
+<td> 12
+</td>
+<td> The next 6, 2-byte characters of this entry.
+</td></tr>
+<tr>
+<td> 26
+</td>
+<td> 2
+</td>
+<td> Always zero.
+</td></tr>
+<tr>
+<td> 28
+</td>
+<td> 4
+</td>
+<td> The final 2, 2-byte characters of this entry.
+</td></tr></tbody></table>
+<p>Here is an example of what a regular 8.3 entry with one long file name entry preceding it might look like in a hex editor:
+</p>
+<pre>41 62 00 69 00 6E 00 00 00 FF FF 0F 00 7F FF FF FF FF FF FF FF FF FF FF FF FF 00 00 FF FF FF FF
+42 49 4E 20 20 20 20 20 20 20 20 10 00 00 F7 01 D5 38 D5 38 00 00 F7 01 D5 38 03 00 00 00 00 00
+</pre>
+<p>And in a text editor:
+</p>
+<pre>Ab.i.n..........................
+BIN        ......8.8.....8......
+</pre>
+<p>The first line is the long file name entry (the second line is the 
+regular 8.3 entry). The very first byte (41) tells us two important 
+pieces of information. First, the one (01) tells us that this is the 
+first long file name entry for the regular 8.3 entry. Second the forty 
+(40) part tells us that this is also the <i>last</i> long file name 
+entry for this regular 8.3 entry. The next 10 bytes spell out the first 
+part of the long file name. In this case they read:
+</p>
+<pre>b 00 i 00 n 00 00 00 FF FF
+</pre>
+<p>Notice that each character is two bytes long and that the name is 
+null terminated. The two FF's at the end are the padding at the end of 
+the long file name. This is also what the other FF's in the long file 
+name entry are.
+The final important thing to notice about the long file name entry is 
+it's attribute byte at offset 11. the 0x0F attribute allows us to verify
+ that this is indeed a long file name entry.
+</p>
+<h2> <span class="mw-headline" id="Programming_Guide"> Programming Guide </span></h2>
+<p>This section is intended to give you information about common functions that are preformed on a FAT file system.
+Edit: &lt;plug&gt;If you are focusing on FAT32 only, there is an article for that: <a href="https://wiki.osdev.org/User:Requimrar/FAT32" title="User:Requimrar/FAT32">User:requimrar/FAT32</a> that you might want to check out.&lt;/plug&gt;
+</p>
+<h3> <span class="mw-headline" id="Reading_the_Boot_Sector"> Reading the Boot Sector </span></h3>
+<p>The Boot Sector is always placed at logical sector number zero. You 
+can either read the boot sector into an array and access it's members 
+that way or you can read it into a structure and access it through the 
+structure. Either way, the values in the boot sector need to be readily 
+available in order to do much of anything with a FAT file system.
+</p><p>Here is an example of some boot sector structures in C. 
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw4">typedef</span> <span class="kw4">struct</span> fat_extBS_32
+<span class="br0">{</span>
+	<span class="co1">//extended fat32 stuff</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span>		table_size_32<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		extended_flags<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		fat_version<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span>		root_cluster<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		fat_info<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		backup_BS_sector<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span> 		reserved_0<span class="br0">[</span><span class="nu0">12</span><span class="br0">]</span><span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		drive_number<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span> 		reserved_1<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		boot_signature<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span> 		volume_id<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		volume_label<span class="br0">[</span><span class="nu0">11</span><span class="br0">]</span><span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		fat_type_label<span class="br0">[</span><span class="nu0">8</span><span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+<span class="br0">}</span>__attribute__<span class="br0">(</span><span class="br0">(</span>packed<span class="br0">)</span><span class="br0">)</span> fat_extBS_32_t<span class="sy0">;</span>
+&nbsp;
+<span class="kw4">typedef</span> <span class="kw4">struct</span> fat_extBS_16
+<span class="br0">{</span>
+	<span class="co1">//extended fat12 and fat16 stuff</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		bios_drive_num<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		reserved1<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		boot_signature<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span>		volume_id<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		volume_label<span class="br0">[</span><span class="nu0">11</span><span class="br0">]</span><span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		fat_type_label<span class="br0">[</span><span class="nu0">8</span><span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+<span class="br0">}</span>__attribute__<span class="br0">(</span><span class="br0">(</span>packed<span class="br0">)</span><span class="br0">)</span> fat_extBS_16_t<span class="sy0">;</span>
+&nbsp;
+<span class="kw4">typedef</span> <span class="kw4">struct</span> fat_BS
+<span class="br0">{</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span> 		bootjmp<span class="br0">[</span><span class="nu0">3</span><span class="br0">]</span><span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span> 		oem_name<span class="br0">[</span><span class="nu0">8</span><span class="br0">]</span><span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span> 	        bytes_per_sector<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		sectors_per_cluster<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		reserved_sector_count<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		table_count<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		root_entry_count<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		total_sectors_16<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		media_type<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		table_size_16<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		sectors_per_track<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">short</span>		head_side_count<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span> 		hidden_sector_count<span class="sy0">;</span>
+	<span class="kw4">unsigned</span> <span class="kw4">int</span> 		total_sectors_32<span class="sy0">;</span>
+&nbsp;
+	<span class="co1">//this will be cast to it's specific type once the driver actually knows what type of FAT this is.</span>
+	<span class="kw4">unsigned</span> <span class="kw4">char</span>		extended_section<span class="br0">[</span><span class="nu0">54</span><span class="br0">]</span><span class="sy0">;</span>
+&nbsp;
+<span class="br0">}</span>__attribute__<span class="br0">(</span><span class="br0">(</span>packed<span class="br0">)</span><span class="br0">)</span> fat_BS_t<span class="sy0">;</span></pre></div></div>
+<p>Important pieces of information that can be extracted from the boot sector include:
+</p><p><b>Total sectors in volume (including VBR):</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">total_sectors <span class="sy0">=</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>total_sectors_16 <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span><span class="sy0">?</span> fat_boot<span class="sy0">-&gt;</span>total_sectors_32 <span class="sy0">:</span> fat_boot<span class="sy0">-&gt;</span>total_sectors_16<span class="sy0">;</span></pre></div></div>
+<p><b>FAT size in sectors:</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">fat_size <span class="sy0">=</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>table_size_16 <span class="sy0">==</span> <span class="nu0">0</span><span class="br0">)</span><span class="sy0">?</span> fat_boot_ext_32<span class="sy0">-&gt;</span>table_size_16 <span class="sy0">:</span> fat_boot<span class="sy0">-&gt;</span>table_size_16<span class="sy0">;</span></pre></div></div>
+<p><b>The size of the root directory (unless you have FAT32, in which case the size will be 0):</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">root_dir_sectors <span class="sy0">=</span> <span class="br0">(</span><span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>root_entry_count <span class="sy0">*</span> <span class="nu0">32</span><span class="br0">)</span> <span class="sy0">+</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>bytes_per_sector <span class="sy0">-</span> <span class="nu0">1</span><span class="br0">)</span><span class="br0">)</span> <span class="sy0">/</span> fat_boot<span class="sy0">-&gt;</span>bytes_per_sector<span class="sy0">;</span></pre></div></div>
+<p>This calculation will round up. 32 is the size of a FAT directory in bytes.
+</p><p><br>
+<b>The first data sector (that is, the first sector in which directories and files may be stored):</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">first_data_sector <span class="sy0">=</span> fat_boot<span class="sy0">-&gt;</span>reserved_sector_count <span class="sy0">+</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>table_count <span class="sy0">*</span> fat_size<span class="br0">)</span> <span class="sy0">+</span> root_dir_sectors<span class="sy0">;</span></pre></div></div>
+<p><br>
+<b>The first sector in the File Allocation Table:</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">first_fat_sector <span class="sy0">=</span> fat_boot<span class="sy0">-&gt;</span>reserved_sector_count<span class="sy0">;</span></pre></div></div>
+<p><br>
+<b>The total number of data sectors:</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">data_sectors <span class="sy0">=</span> fat_boot<span class="sy0">-&gt;</span>total_sectors <span class="sy0">-</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>reserved_sector_count <span class="sy0">+</span> <span class="br0">(</span>fat_boot<span class="sy0">-&gt;</span>table_count <span class="sy0">*</span> fat_size<span class="br0">)</span> <span class="sy0">+</span> root_dir_sectors<span class="br0">)</span><span class="sy0">;</span></pre></div></div>
+<p><br>
+<b>The total number of clusters:</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">total_clusters <span class="sy0">=</span> data_sectors <span class="sy0">/</span> fat_boot<span class="sy0">-&gt;</span>sectors_per_cluster<span class="sy0">;</span></pre></div></div>
+<p>This rounds down.
+</p><p><br>
+<b>The FAT type of this file system:</b>
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1"><span class="kw1">if</span><span class="br0">(</span>total_clusters <span class="sy0">&lt;</span> <span class="nu0">4085</span><span class="br0">)</span> 
+<span class="br0">{</span>
+   fat_type <span class="sy0">=</span> FAT12<span class="sy0">;</span>
+<span class="br0">}</span> 
+<span class="kw1">else</span> <span class="kw1">if</span><span class="br0">(</span>total_clusters <span class="sy0">&lt;</span> <span class="nu0">65525</span><span class="br0">)</span> 
+<span class="br0">{</span>
+   fat_type <span class="sy0">=</span> FAT16<span class="sy0">;</span>
+<span class="br0">}</span> 
+<span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">(</span>total_clusters <span class="sy0">&lt;</span> <span class="nu0">268435445</span><span class="br0">)</span>
+<span class="br0">{</span>
+   fat_type <span class="sy0">=</span> FAT32<span class="sy0">;</span>
+<span class="br0">}</span>
+<span class="kw1">else</span>
+<span class="br0">{</span> 
+   fat_type <span class="sy0">=</span> ExFAT<span class="sy0">;</span>
+<span class="br0">}</span></pre></div></div>
+<h3> <span class="mw-headline" id="Reading_Directories"> Reading Directories </span></h3>
+<p>The first step in reading directories is finding and reading the root
+ directory. On a FAT 12 or FAT 16 volumes the root directory is at a 
+fixed position immediately after the File Allocation Tables:
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">first_root_dir_sector <span class="sy0">=</span> first_data_sector <span class="sy0">-</span> root_dir_sectors<span class="sy0">;</span></pre></div></div>
+<p>In FAT32, root directory appears in data area on given cluster and can be a cluster chain.
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">root_cluster_32 <span class="sy0">=</span> extBS_32<span class="sy0">-&gt;</span>root_cluster<span class="sy0">;</span></pre></div></div>
+<p>For each given cluster number we can calculate the first sector of it (relative to the partition's offset):
+</p>
+<div dir="ltr" class="mw-geshi" style="text-align: left;"><div class="c source-c"><pre class="de1">first_sector_of_cluster <span class="sy0">=</span> <span class="br0">(</span><span class="br0">(</span>cluster <span class="sy0">-</span> <span class="nu0">2</span><span class="br0">)</span> <span class="sy0">*</span> fat_boot<span class="sy0">-&gt;</span>sectors_per_cluster<span class="br0">)</span> <span class="sy0">+</span> first_data_sector<span class="sy0">;</span></pre></div></div>
+<p>After the correct cluster has been loaded into memory, the next step 
+is to read and parse all of the entries in it. Each entry is 32 bytes 
+long. For each 32 byte entry this is the flow of execution:
+</p>
+<ol><li> If the first byte of the entry is equal to 0 then there are no 
+more files/directories in this directory. FirstByte==0, finish. 
+FirstByte!=0, goto 2.
+</li><li> If the first byte of the entry is equal to 0xE5 then the entry is unused. FirstByte==0xE5, goto 8, FirstByte!=0xE5, goto 3.
+</li><li> Is this entry a long file name entry? If the 11'th byte of the
+ entry equals 0x0F, then it is a long file name entry. Otherwise, it is 
+not. 11thByte==0x0F, goto 4. 11thByte!=0x0F, goto 5.
+</li><li> Read the portion of the long filename into a temporary buffer. Goto 8.
+</li><li> Parse the data for this entry using the table from further up 
+on this page. It would be a good idea to save the data for later. 
+Possibly in a virtual file system structure. goto 6
+</li><li> Is there a long file name in the temporary buffer? Yes, goto 7. No, goto 8
+</li><li> Apply the long file name to the entry that you just read and clear the temporary buffer. goto 8
+</li><li> Increment pointers and/or counters and check the next entry. (goto number 1) 
+</li></ol>
+<p>This process should be repeated until all of the entries have been 
+read from the cluster. You should then check to see if there is another 
+cluster following this one in the cluster chain or if this is the last 
+cluster in the chain. See <a href="#Following_Cluster_Chains">section below</a> and <a href="#File_Allocation_Table">FAT</a>
+ section for more information. You should do the above process for each 
+cluster in the chain, following it until there are no more clusters left
+ in the chain. Then you can check if any of the entries that you just 
+read are directories. If the are they should each be read in the same 
+way starting with their first cluster number which is stored in the 
+entry.
+</p>
+<h3> <span class="mw-headline" id="Following_Cluster_Chains"> Following Cluster Chains </span></h3>
+<p>There are two basic steps to following cluster chains. The first step
+ is to find out if there is another "link" (cluster) following the 
+current one in the chain. The second step is to actually use the value 
+read from the FAT to read the next sector. Here is the basic idea:
+</p>
+<ol><li> Extract the value from the FAT for the _current_ cluster. (Use 
+the previous section on the File Allocation Table for details on how 
+exactly to extract the value.) goto number 2
+</li><li> Is this cluster marked as the last cluster in the chain? 
+(again, see the above section for more details) Yes, goto number 4. No, 
+goto number 3
+</li><li> Read the cluster represented by the extracted value and return for more directory parsing.
+</li><li> The end of the cluster chain has been found. Our work here is finished.&nbsp;:)
+</li></ol>
+<h2> <span class="mw-headline" id="Creating_a_fresh_FAT_filesystem"> Creating a fresh FAT filesystem </span></h2>
+<p>Typically during development you want to create a disk image with a 
+FAT filesystem. There are two common approaches for this, either by 
+using a utility that works directly on images, or by using a <a href="https://wiki.osdev.org/Loopback_Device" title="Loopback Device">Loopback Device</a> and using the OS' own driver to work on the image. A less common alternative is to have an actual disk in your drive.
+</p><p>The most buildscript-friendly tool is <a href="https://wiki.osdev.org/MTools" title="MTools">MTools</a>
+ - which can do all operations directly on a disk image using the -i 
+argument and supplies every DOS command related to files in this 
+fashion, only prefixed with an <tt>m</tt>. It can also use a 
+configuration file to access drives in their DOS fashion, allowing you 
+to use for instance A: and C: as actual drives. The tool can be built 
+out of the box for Windows and is included in many a linux package 
+manager.
+</p><p>Linux-only developers can, often with a bit of sudo and permission magic, automate the <a href="https://wiki.osdev.org/Loopback_Device" title="Loopback Device">Loopback Device</a> in combination with <tt>mkdosfs</tt> or <tt>mkfs.vfat</tt>
+ as well as partition editing. This method is less portable as the 
+commands often can't be reused outside of Linux. Several developers also
+ make the error of passing -F to mkdosfs in an attempt to choose a FAT 
+size, which often has the effect of creating a corrupt filesystem since 
+the result doesn't follow <a href="#Reading_the_Boot_Sector">the official rule for FAT sizes anymore</a>.
+</p><p>Windows users can make use of <a href="https://wiki.osdev.org/Virtual_Floppy_Drive" title="Virtual Floppy Drive">VFD</a> for loopback devices. It comes with a GUI, but at the cost of not being properly automatable in a script.
+</p>
+<h2> <span class="mw-headline" id="See_Also">See Also</span></h2>
+<h3> <span class="mw-headline" id="Threads"> Threads </span></h3>
+<ul><li> from raw bits to directory listing (code posted) in the <a href="http://forum.osdev.org/viewtopic.php?t=11247" class="extiw" title="topic:11247">forum</a>
+</li><li> Public Domain FAT32 code in the <a href="http://forum.osdev.org/viewtopic.php?t=13993" class="extiw" title="topic:13993">forum</a>
+</li><li> FAT12/FAT16 bootsector code in the <a href="http://forum.osdev.org/viewtopic.php?t=21155" class="extiw" title="topic:21155">forum</a>
+</li></ul>
+<h3> <span class="mw-headline" id="External_Links"> External Links </span></h3>
+<ul><li> <a rel="nofollow" class="external text" href="http://www.osdever.net/downloads/docs/fatgen103.zip">FAT32 File System Specification</a> - from Cottontail OS Development Library
+</li><li> <a rel="nofollow" class="external text" href="http://download.microsoft.com/download/1/6/1/161ba512-40e2-4cc9-843a-923143f3456c/fatgen103.doc">FAT32 File System Specification</a> - from Microsoft (documentation, but in tutorial style with many code examples)
+</li><li> <a rel="nofollow" class="external text" href="http://board.flatassembler.net/topic.php?t=12680">About an error in the above specification</a>
+</li><li> <a rel="nofollow" class="external free" href="http://scottie.20m.com/fat.htm">http://scottie.20m.com/fat.htm</a>
+</li><li> <a rel="nofollow" class="external free" href="http://www.maverick-os.dk/FileSystemFormats/FAT12_FileSystem.html">http://www.maverick-os.dk/FileSystemFormats/FAT12_FileSystem.html</a>
+</li><li> <a rel="nofollow" class="external free" href="http://www.pjrc.com/tech/8051/ide/fat32.html">http://www.pjrc.com/tech/8051/ide/fat32.html</a>
+</li><li> <a rel="nofollow" class="external text" href="http://web.archive.org/web/20170112194555/http://www.viralpatel.net/taj/tutorial/fat.php">Intro into Sectors and Addressing</a>
+</li><li> <a rel="nofollow" class="external free" href="http://elm-chan.org/fsw/ff/00index_e.html">http://elm-chan.org/fsw/ff/00index_e.html</a> - simple (V)FAT12/16/32 read/write library with good documentation
+</li><li> <a rel="nofollow" class="external free" href="http://gitorious.org/unix-stuff/fat-util">http://gitorious.org/unix-stuff/fat-util</a> - Utility to read, remove and extract files on FAT12, 16 and 32
+</li><li> <a rel="nofollow" class="external free" href="http://www.larwe.com/zws/products/dosfs/index.html">http://www.larwe.com/zws/products/dosfs/index.html</a> - fat12/16/32 compatible fs driver
+</li><li> <a rel="nofollow" class="external free" href="http://www.isdaman.com/alsos/protocols/fats/nowhere/FAT.HTM">http://www.isdaman.com/alsos/protocols/fats/nowhere/FAT.HTM</a>
+</li></ul>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 691/1000000
+Post-expand include size: 4348/2097152 bytes
+Template argument size: 2336/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:1506-0!*!0!!en!*!* and timestamp 20180521023401 -->
+</div>				<!-- /bodycontent -->
+								<!-- printfooter -->
+				<div class="printfooter">
+				Retrieved from "<a href="https://wiki.osdev.org/index.php?title=FAT&amp;oldid=21091">https://wiki.osdev.org/index.php?title=FAT&amp;oldid=21091</a>"				</div>
+				<!-- /printfooter -->
+												<!-- catlinks -->
+				<div id="catlinks" class="catlinks"><div id="mw-normal-catlinks"><a href="https://wiki.osdev.org/Special:Categories" title="Special:Categories">Category</a>: <ul><li><a href="https://wiki.osdev.org/Category:Filesystems" title="Category:Filesystems">Filesystems</a></li></ul></div></div>				<!-- /catlinks -->
+												<div class="visualClear"></div>
+				<!-- debughtml -->
+								<!-- /debughtml -->
+			</div>
+			<!-- /bodyContent -->
+		</div>
+		<!-- /content -->
+		<!-- header -->
+		<div id="mw-head" class="noprint">
+			
+<!-- 0 -->
+<div id="p-personal" class="">
+	<h5>Personal tools</h5>
+	<ul>
+		<li id="pt-login"><a href="https://wiki.osdev.org/index.php?title=Special:UserLogin&amp;returnto=FAT" title="You are encouraged to log in; however, it is not mandatory [alt-shift-o]" accesskey="o">Log in</a></li>
+	</ul>
+</div>
+
+<!-- /0 -->
+			<div id="left-navigation">
+				
+<!-- 0 -->
+<div id="p-namespaces" class="vectorTabs">
+	<h5>Namespaces</h5>
+	<ul>
+					<li id="ca-nstab-main" class="selected"><span><a href="https://wiki.osdev.org/FAT" title="View the content page [alt-shift-c]" accesskey="c">Page</a></span></li>
+					<li id="ca-talk"><span><a href="https://wiki.osdev.org/Talk:FAT" title="Discussion about the content page [alt-shift-t]" accesskey="t">Discussion</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-variants" class="vectorMenu emptyPortlet">
+		<h5><span>Variants</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+			</div>
+			<div id="right-navigation">
+				
+<!-- 0 -->
+<div id="p-views" class="vectorTabs">
+	<h5>Views</h5>
+	<ul>
+					<li id="ca-view" class="selected"><span><a href="https://wiki.osdev.org/FAT">Read</a></span></li>
+					<li id="ca-viewsource"><span><a href="https://wiki.osdev.org/index.php?title=FAT&amp;action=edit" title="This page is protected.
+You can view its source [alt-shift-e]" accesskey="e">View source</a></span></li>
+					<li id="ca-history" class="collapsible"><span><a href="https://wiki.osdev.org/index.php?title=FAT&amp;action=history" title="Past revisions of this page [alt-shift-h]" accesskey="h">View history</a></span></li>
+			</ul>
+</div>
+
+<!-- /0 -->
+
+<!-- 1 -->
+<div id="p-cactions" class="vectorMenu emptyPortlet">
+	<h5><span>Actions</span><a href="#"></a></h5>
+	<div class="menu">
+		<ul>
+					</ul>
+	</div>
+</div>
+
+<!-- /1 -->
+
+<!-- 2 -->
+<div id="p-search">
+	<h5><label for="searchInput">Search</label></h5>
+	<form action="/index.php" id="searchform">
+		<input name="title" value="Special:Search" type="hidden">
+				<input name="search" title="Search OSDev Wiki [alt-shift-f]" accesskey="f" id="searchInput" type="search">		<input name="go" value="Go" title="Go to a page with this exact name if exists" id="searchGoButton" class="searchButton" type="submit">		<input name="fulltext" value="Search" title="Search the pages for this text" id="mw-searchButton" class="searchButton" type="submit">			</form>
+</div>
+
+<!-- /2 -->
+			</div>
+		</div>
+		<!-- /header -->
+		<!-- panel -->
+			<div id="mw-panel" class="noprint">
+				<!-- logo -->
+					<div id="p-logo"><a style="background-image: url(/skins/common/images/osdev.png);" href="https://wiki.osdev.org/Main_Page" title="Visit the main page"></a></div>
+				<!-- /logo -->
+				
+<!-- navigation -->
+<div class="portal" id="p-navigation">
+	<h5>Navigation</h5>
+	<div class="body">
+		<ul>
+			<li id="n-mainpage"><a href="https://wiki.osdev.org/Main_Page" title="Visit the main page [alt-shift-z]" accesskey="z">Main Page</a></li>
+			<li id="n-portal"><a href="http://forum.osdev.org/" rel="nofollow" title="About the project, what you can do, where to find things">Forums</a></li>
+			<li id="n-FAQ"><a href="https://wiki.osdev.org/Category:FAQ">FAQ</a></li>
+			<li id="n-OS-Projects"><a href="https://wiki.osdev.org/Projects">OS Projects</a></li>
+			<li id="n-randompage"><a href="https://wiki.osdev.org/Special:Random" title="Load a random page [alt-shift-x]" accesskey="x">Random page</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /navigation -->
+
+<!-- about -->
+<div class="portal" id="p-about">
+	<h5>About</h5>
+	<div class="body">
+		<ul>
+			<li id="n-This-site"><a href="https://wiki.osdev.org/OSDevWiki:About">This site</a></li>
+			<li id="n-Joining"><a href="https://wiki.osdev.org/OSDevWiki:Joining">Joining</a></li>
+			<li id="n-Editing-help"><a href="https://wiki.osdev.org/OSDevWiki:Editing">Editing help</a></li>
+			<li id="n-recentchanges"><a href="https://wiki.osdev.org/Special:RecentChanges" title="A list of recent changes in the wiki [alt-shift-r]" accesskey="r">Recent changes</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /about -->
+
+<!-- SEARCH -->
+
+<!-- /SEARCH -->
+
+<!-- TOOLBOX -->
+<div class="portal" id="p-tb">
+	<h5>Toolbox</h5>
+	<div class="body">
+		<ul>
+			<li id="t-whatlinkshere"><a href="https://wiki.osdev.org/Special:WhatLinksHere/FAT" title="A list of all wiki pages that link here [alt-shift-j]" accesskey="j">What links here</a></li>
+			<li id="t-recentchangeslinked"><a href="https://wiki.osdev.org/Special:RecentChangesLinked/FAT" title="Recent changes in pages linked from this page [alt-shift-k]" accesskey="k">Related changes</a></li>
+			<li id="t-specialpages"><a href="https://wiki.osdev.org/Special:SpecialPages" title="A list of all special pages [alt-shift-q]" accesskey="q">Special pages</a></li>
+			<li><a href="https://wiki.osdev.org/index.php?title=FAT&amp;printable=yes" rel="alternate">Printable version</a></li>
+			<li id="t-permalink"><a href="https://wiki.osdev.org/index.php?title=FAT&amp;oldid=21091" title="Permanent link to this revision of the page">Permanent link</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /TOOLBOX -->
+
+<!-- LANGUAGES -->
+<div class="portal" id="p-lang">
+	<h5>In other languages</h5>
+	<div class="body">
+		<ul>
+			<li class="interwiki-de"><a href="http://www.lowlevel.eu/wiki/FAT" title="FAT">Deutsch</a></li>
+		</ul>
+	</div>
+</div>
+
+<!-- /LANGUAGES -->
+			</div>
+		<!-- /panel -->
+		<!-- footer -->
+		<div id="footer">
+							<ul id="footer-info">
+											<li id="footer-info-lastmod"> This page was last modified on 13 August 2017, at 06:14.</li>
+											<li id="footer-info-viewcount">This page has been accessed 191,405 times.</li>
+									</ul>
+							<ul id="footer-places">
+											<li id="footer-places-privacy"><a href="https://wiki.osdev.org/OSDev_Wiki:Privacy_policy" title="OSDev Wiki:Privacy policy">Privacy policy</a></li>
+											<li id="footer-places-about"><a href="https://wiki.osdev.org/OSDev_Wiki:About" title="OSDev Wiki:About">About OSDev Wiki</a></li>
+											<li id="footer-places-disclaimer"><a href="https://wiki.osdev.org/OSDev_Wiki:General_disclaimer" title="OSDev Wiki:General disclaimer">Disclaimers</a></li>
+									</ul>
+										<ul id="footer-icons" class="noprint">
+					<li id="footer-poweredbyico">
+						<a href="http://www.mediawiki.org/"><img src="FAT%20-%20OSDev%20Wiki_files/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" width="88" height="31"></a>
+					</li>
+				</ul>
+						<div style="clear:both"></div>
+		</div>
+		<!-- /footer -->
+		<!-- fixalpha -->
+		<script type="text/javascript"> if ( window.isMSIE55 ) fixalpha(); </script>
+		<!-- /fixalpha -->
+		<script src="FAT%20-%20OSDev%20Wiki_files/load_004.php"></script>
+<script>if(window.mw){
+	mw.loader.load(["mediawiki.user", "mediawiki.util", "mediawiki.page.ready", "mediawiki.legacy.wikibits", "mediawiki.legacy.ajax"]);
+}
+</script><script type="text/javascript" src="FAT%20-%20OSDev%20Wiki_files/load_005.php"></script>
+<script src="FAT%20-%20OSDev%20Wiki_files/load_002.php"></script>
+<script>if(window.mw){
+	mw.user.options.set({"ccmeonemails":0,"cols":80,"date":"default","diffonly":0,"disablemail":0,"disablesuggest":0,"editfont":"default","editondblclick":0,"editsection":1,"editsectiononrightclick":0,"enotifminoredits":0,"enotifrevealaddr":0,"enotifusertalkpages":1,"enotifwatchlistpages":0,"extendwatchlist":0,"externaldiff":0,"externaleditor":0,"fancysig":0,"forceeditsummary":0,"gender":"unknown","hideminor":0,"hidepatrolled":0,"highlightbroken":1,"imagesize":2,"justify":0,"math":1,"minordefault":0,"newpageshidepatrolled":0,"nocache":0,"noconvertlink":0,"norollbackdiff":0,"numberheadings":0,"previewonfirst":0,"previewontop":1,"quickbar":5,"rcdays":7,"rclimit":50,"rememberpassword":0,"rows":25,"searchlimit":20,"showhiddencats":0,"showjumplinks":1,"shownumberswatching":1,"showtoc":1,"showtoolbar":1,"skin":"vector","stubthreshold":0,"thumbsize":2,"underline":2,"uselivepreview":0,"usenewrc":0,"watchcreations":0,"watchdefault":0,"watchdeletion":0,"watchlistdays":3,"watchlisthideanons":0,
+	"watchlisthidebots":0,"watchlisthideliu":0,"watchlisthideminor":0,"watchlisthideown":0,"watchlisthidepatrolled":0,"watchmoves":0,"wllimit":250,"variant":"en","language":"en","searchNs0":true,"searchNs1":false,"searchNs2":false,"searchNs3":false,"searchNs4":false,"searchNs5":false,"searchNs6":false,"searchNs7":false,"searchNs8":false,"searchNs9":false,"searchNs10":false,"searchNs11":false,"searchNs12":false,"searchNs13":false,"searchNs14":false,"searchNs15":false});;mw.user.tokens.set({"editToken":"+\\","watchToken":false});;mw.loader.state({"user.options":"ready","user.tokens":"ready"});
+	
+	/* cache key: wikidb:resourceloader:filter:minify-js:4:19a4b18a9ac79a6b8c60b24af4668814 */
+}
+</script><!-- Served in 0.035 secs. -->
+	
+
+</body></html>
