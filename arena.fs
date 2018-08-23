@@ -117,6 +117,8 @@ cr
 
 base !
 
+0 [if]
+
 \ this value was obtained by reading the BAR0 pci register of the virtualbox
 \ ohci device
 $f0804000 constant ohci-physical-mem-base
@@ -321,6 +323,10 @@ test-ohci-data-area test-TD3 2 cells + !
 	;
 
 ohci-init
+
+
+[then]
+
 
 .( this is console number ) active-process . cr
 

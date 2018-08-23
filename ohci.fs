@@ -66,6 +66,10 @@ $38	constant HcFmRemaining
 $3C	constant HcFmNumber
 $40	constant HcPeriodicStart
 $44	constant HcLSThreshold
+$48	constant HcRhDescriptorA
+$4c	constant HcRhDescriptorB
+$50	constant HcRhStatus
+$54	constant HcRhPortStatus
 
 $54	constant HcRhPortStatus[1]
 \ fields in the HcRhPortStatus[xxx] register
