@@ -327,6 +327,11 @@ ohci-init
 
 [then]
 
+.( enable usb ohci bus mastering)cr cr
+0 6 0 make-pci-config-address dup
+IO-PCICFG outpl IO-PCIDATA inpw 6 ( memory space, and bus master) or swap
+IO-PCICFG outpl IO-PCIDATA outpw
+
 
 .( this is console number ) active-process . cr
 

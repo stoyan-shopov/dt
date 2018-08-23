@@ -63,20 +63,25 @@ struct ohci_registers
 
 /* ohci transfer descriptor */
 struct ohci_td
-{	struct
+{	
+	union
 	{
-		uint32_t			:	18;
-		uint32_t	buffer_rounding	:	1;
-		/* direction/pid values:
-		 * %00 - SETUP
-		 * %01 - OUT
-		 * %10 - IN
-		 * %11 - reserved */
-		uint32_t	direction_pid	:	2;
-		uint32_t	delay_interrupt	:	3;
-		uint32_t	data_toggle	:	2;
-		uint32_t	error_count	:	2;
-		uint32_t	condition_code	:	2;
+		struct
+		{
+					uint32_t			:	18;
+					uint32_t	buffer_rounding	:	1;
+					/* direction/pid values:
+					 * %00 - SETUP
+					 * %01 - OUT
+					 * %10 - IN
+					 * %11 - reserved */
+					uint32_t	direction_pid	:	2;
+					uint32_t	delay_interrupt	:	3;
+					uint32_t	data_toggle	:	2;
+					uint32_t	error_count	:	2;
+					uint32_t	condition_code	:	2;
+		};
+		uint32_t	flags;
 	};
 	/* points to the first byte of the buffer;
 	 * hardware sets this to zero when the transfer completes */
@@ -109,30 +114,34 @@ static void free_td(volatile struct ohci_td * td)
 /* ohci endpoint descriptor */
 struct ohci_ed
 {
-	struct
+	union
 	{
-		uint32_t	function_address	:	7;
-		uint32_t	endpoint_number		:	4;
-		/* direction values:
-		 * %00 - get direction from transfer descriptor (TD)
-		 * %01 - OUT
-		 * %10 - IN
-		 * %11 - get direction from transfer descriptor (TD)
-		 */
-		uint32_t	direction		:	2;
-		/* speed values:
-		 * 0 - full speed
-		 * 1 - low speed
-		 */
-		uint32_t	speed		:	1;
-		/* if 1, the usb host controller skips this endpoint descriptor */
-		uint32_t	skip		:	1;
-		/* format of the descriptors linked to this ED:
-		 * 0 - general transfer descriptor format - used for bulk, control, interrupt endpoints
-	         * 1 - isochronous transfer descriptor	 
-		 */
-		uint32_t	format		:	1;
-		uint32_t	max_packet_size	:	11;
+		struct
+		{
+			uint32_t	function_address	:	7;
+			uint32_t	endpoint_number		:	4;
+			/* direction values:
+			 * %00 - get direction from transfer descriptor (TD)
+			 * %01 - OUT
+			 * %10 - IN
+			 * %11 - get direction from transfer descriptor (TD)
+			 */
+			uint32_t	direction		:	2;
+			/* speed values:
+			 * 0 - full speed
+			 * 1 - low speed
+			 */
+			uint32_t	speed		:	1;
+			/* if 1, the usb host controller skips this endpoint descriptor */
+			uint32_t	skip		:	1;
+			/* format of the descriptors linked to this ED:
+			 * 0 - general transfer descriptor format - used for bulk, control, interrupt endpoints
+			 * 1 - isochronous transfer descriptor	 
+			 */
+			uint32_t	format		:	1;
+			uint32_t	max_packet_size	:	11;
+		};
+		uint32_t	flags;
 	};
 	/* below, if head == tail, then the list is empty */
 	struct ohci_td	* tail;
@@ -150,23 +159,48 @@ struct ohci_ed
 	/* this is 0 for the last entry in the list */
 	struct ohci_ed	* next;
 } __attribute__ ((aligned (16)));
+static uint32_t bitmap_used_eds;
+static volatile struct ohci_ed eds[32];
+static volatile struct ohci_ed * allot_ed(void)
+{
+int x;
+struct ohci_ed * ed;
+	if ((x = find_first_clear(bitmap_used_eds)) == -1)
+		return 0;
+	bitmap_used_eds |= 1 << x;
+
+	ed = eds + x;
+	ed->flags = /* skip */ bit(14);
+	ed->next = 0;
+	ed->tail = 0;
+	ed->head = 0;
+	return ed;
+}
+static void free_ed(volatile struct ohci_ed * ed)
+{
+	bitmap_used_eds &=~ (1 << (ed - eds));
+}
 
 /* HCCA - host controller communications area */
 struct ohci_hcca
 {
-	struct ohci_ed	interrupt_table[32];
+	volatile struct ohci_ed	* interrupt_table[32];
 	/* note: this field is 16 bit, the most significant 16 bits are set to zero by the hardware */
 	uint32_t	frame_number;
 	struct ohci_td	done_head;
 	uint32_t	reserved[116 / 4];
 } __attribute__ ((aligned (4)));
-static struct ohci_hcca ohci_hcca;
+static volatile struct ohci_hcca ohci_hcca;
 
 static volatile struct ohci_registers * ohci;
 
 
 void init_ohci(void)
 {
+volatile struct ohci_ed * ed = 0;
+volatile struct ohci_td * td = 0;
+int i;
+
 	sf_eval(SFORTH_OHCI_PHYSICAL_MEM_BASE " " "phys-mem-map phys-mem-window-base");
 	ohci = (void *) sf_pop();
 	if (ohci->HcRevision != 0x10)
@@ -174,5 +208,48 @@ void init_ohci(void)
 		print_str("bad usb ohci address\n");
 		return;
 	}
+	print_str("detected usb ohci 1.0\n");
+	ohci->HcInterruptDisable = 0xc000007f;
+	if (ohci->HcControl != 0x200)
+	{
+abort:		
+		print_str("unexpected usb ohci register value, aborting\n");
+		return;
+	}
+	ohci->HcCommandStatus = 1;
+	while (ohci->HcCommandStatus & 1);
+	ohci->HcFmInterval = 0x27792edf;
+	ohci->HcPeriodicStart = 0x2a2f;
+	/* initialize ohci hcca */
+	ed = allot_ed();
+	for (i = 0; i < 32; ohci_hcca.interrupt_table[i ++] = ed);
+
+	ohci->HcHCCA = (uint32_t) & ohci_hcca;
 }
 
+#if 0
+struct ohci_registers
+{
+	uint32_t	HcRevision;
+	uint32_t	HcControl;
+	uint32_t	HcCommandStatus;
+	uint32_t	HcInterruptStatus;
+	uint32_t	HcInterruptEnable;
+	uint32_t	HcInterruptDisable;
+	uint32_t	HcHCCA;
+	uint32_t	HcPeriodCurrentED;
+	uint32_t	HcControlHeadED;
+	uint32_t	HcControlCurrentED;
+	uint32_t	HcBulkHeadED;
+	uint32_t	HcBulkCurrentED;
+	uint32_t	HcDoneHead;
+	uint32_t	HcFmInterval;
+	uint32_t	HcFmRemaining;
+	uint32_t	HcFmNumber;
+	uint32_t	HcPeriodicStart;
+	uint32_t	HcLSThreshold;
+	uint32_t	HcRhDescriptorA;
+	uint32_t	HcRhDescriptorB;
+	uint32_t	HcRhStatus;
+	uint32_t	HcRhPortStatus;
+#endif

@@ -135,6 +135,8 @@ void (* const * finit) (void);
 	sf_init();
 	sf_eval(INITIAL_DT_SFORTH_CODE);
 
+	init_ohci();
+
 	do_quit();
 
 	asm("sti");
