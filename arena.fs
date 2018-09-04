@@ -324,6 +324,7 @@ test-ohci-data-area test-TD3 2 cells + !
 
 ohci-init
 
+vkjnfdkjvnfdkjvnfdk
 
 [then]
 
@@ -331,6 +332,34 @@ ohci-init
 0 6 0 make-pci-config-address dup
 IO-PCICFG outpl IO-PCIDATA inpw 6 ( memory space, and bus master) or swap
 IO-PCICFG outpl IO-PCIDATA outpw
+
+phys-mem-window-base constant ohci
+
+: ?port1 ( --)
+	ohci HcRhPortStatus[1] + @
+	CCS over and 0<> if ." device connected" else ." device NOT connected" then cr
+	PES over and 0<> if ." port enabled" else ." port NOT enabled" then cr
+	PSS over and 0<> if ." port IS in suspend" else ." port not in suspend" then cr
+	PRS over and 0<> if ." port IS in reset" else ." port not in reset" then cr
+	LSDA over and 0<> if ." LOW speed device attached" else ." full speed device attached" then cr
+	drop
+	;
+
+: port1-reset ( --)
+	PRS ohci HcRhPortStatus[1] + !
+	;
+
+: ?ohci ( reg --)
+	base @ >r hex ohci + @ u. cr r> base ! ;
+
+: ohci-sof-count ( -- sof-count)
+	SF ohci HcInterruptStatus + !
+	begin ohci HcInterruptStatus + @ SF and until
+	SF ohci HcInterruptStatus + !
+	0
+	begin 1+ ohci HcInterruptStatus + @ SF and until
+	;
+
 
 
 .( this is console number ) active-process . cr
