@@ -34,6 +34,10 @@ enum
 	OHCI_PHYSICAL_MEM_BASE	=	0xf0804000,
 	/*! \todo	init this from the root hub status register */
 	OHCI_NR_HUB_PORTS	=	12,
+	OHCI_MAX_NR_HUB_PORTS	=	12,
+	/* number of endpoint descriptor groups to statically allocate;
+	 * each group contains 32 endpoint descriptors */
+	OHCI_NR_ED_GROUPS,
 };
 
 
@@ -60,7 +64,7 @@ struct ohci_registers
 	uint32_t	HcRhDescriptorA;
 	uint32_t	HcRhDescriptorB;
 	uint32_t	HcRhStatus;
-	uint32_t	HcRhPortStatus;
+	uint32_t	HcRhPortStatus[OHCI_MAX_NR_HUB_PORTS];
 };
 
 /* ohci transfer descriptor */
@@ -161,17 +165,25 @@ struct ohci_ed
 	/* this is 0 for the last entry in the list */
 	struct ohci_ed	* next;
 } __attribute__ ((aligned (16), packed));
-static uint32_t bitmap_used_eds;
-static volatile struct ohci_ed eds[32];
+static uint32_t bitmap_used_eds[OHCI_NR_ED_GROUPS];
+static volatile struct ohci_ed eds[32 * OHCI_NR_ED_GROUPS];
 static volatile struct ohci_ed * allot_ed(void)
 {
-int x;
+int x, i;
 struct ohci_ed * ed;
-	if ((x = find_first_clear(bitmap_used_eds)) == -1)
+	for (i = 0; i < OHCI_NR_ED_GROUPS; i ++)
+		if ((x = find_first_clear(bitmap_used_eds[i])) != -1)
+			break;
+	if (i == OHCI_NR_ED_GROUPS)
+	{
+		print_str("OUT OF ENDPOINT DESCRIPTORS");
+		while (1)
+			asm("hlt");
 		return 0;
-	bitmap_used_eds |= 1 << x;
+	}
+	bitmap_used_eds[i] |= 1 << x;
 
-	ed = eds + x;
+	ed = eds + x + (i << 5);
 	ed->flags = /* skip */ bit(14);
 	ed->next = 0;
 	ed->tail = 0;
@@ -180,7 +192,8 @@ struct ohci_ed * ed;
 }
 static void free_ed(volatile struct ohci_ed * ed)
 {
-	bitmap_used_eds &=~ (1 << (ed - eds));
+int i = ed - eds;
+	bitmap_used_eds[i >> 5] &=~ (1 << (i & ((1 << 5) - 1)));
 }
 
 /* HCCA - host controller communications area */
@@ -196,15 +209,30 @@ static volatile struct ohci_hcca ohci_hcca;
 
 static volatile struct ohci_registers * ohci;
 
+static const struct
+{
+	uint8_t set_address[8];
+}
+usb_request_packets =
+{
+	.set_address = { 0x00, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, },
+};
+
 
 void init_ohci(void)
 {
-volatile struct ohci_ed * ed = 0;
+volatile struct ohci_ed * ed = 0, * control_ed = 0;
 volatile struct ohci_td * td = 0;
 int i;
 
+	/* enable usb ohci bus mastering */
+	/*! \todo	this is specific for virtual box, fix it to be more generic */
+	sf_eval("0 6 0 make-pci-config-address 4 + dup");
+	sf_eval("IO-PCICFG outpl IO-PCIDATA inpw 6 ( memory space, and bus master) or swap");
+	sf_eval("IO-PCICFG outpl IO-PCIDATA outpw");
+
 	/* disable caching for the ohci data page */
-	sf_push((cell) & ohci_hcca);
+	sf_push(((cell) & ohci_hcca) & ~ ((1 << 12) - 1));
 	sf_eval("mem-page-disable-caching");
 
 	sf_eval(SFORTH_OHCI_PHYSICAL_MEM_BASE " " "phys-mem-map phys-mem-window-base");
@@ -236,13 +264,61 @@ abort:
 	/* move to USBOperational state */
 	ohci->HcControl = (ohci->HcControl & ~(3 << 6)) | (2 << 6);
 
+	/* fill control list head */
+	control_ed = allot_ed();
+	control_ed->flags = (/* max packet size */ 0x40 << 16) | /* skip */ bit(14);
+	control_ed->next = 0;
+	control_ed->head = td = allot_td();
+
+	/* setup stage of control transfer */
+	td->flags = 0xf2000000;
+	td->current_buffer = usb_request_packets.set_address;
+	td->buffer_end = usb_request_packets.set_address + sizeof usb_request_packets.set_address;
+	td->next = allot_td();
+	td = td->next;
+	/* no data stage for control trasfer */
+	{{{{{{{{{{{{{{{;;;;;;;;;;;;;;;;;}}}}}}}}}}}}}}}
+	/* status stage of control trasfer */
+	td->flags = 0xf3100000;
+	td->current_buffer = td->buffer_end = 0;
+	td->next = /* empty place holder transfer descriptor */ control_ed->tail = allot_td();
+
+	ohci->HcControlHeadED = control_ed;
+	ohci->HcControl |= /* enable control list */ bit(4);
+
 	ohci->HcControlCurrentED = 0;
 	ohci->HcBulkCurrentED = 0;
 	if (ohci->HcRhDescriptorA != 0x20c) 
 		goto abort;
 	/* power on hub ports */
 	ohci->HcRhStatus = 0x10000;
+
+	/* try to drive the first port */
+	if (!(ohci->HcRhPortStatus[0] & 1))
+	{
+		print_str("usb port 0 not connected, giving up\n");
+		goto abort;
+	}
+	/* reset port 0 */
+	ohci->HcRhPortStatus[0] = 1 << 4;
+	while (!(ohci->HcRhPortStatus[0] & (1 << 20)))
+		;
+	ohci->HcRhPortStatus[0] = 0x001f0000;
+	if (ohci->HcRhPortStatus[0] != 0x103)
+		goto abort;
+	control_ed->flags = 0x40 << 16;
+	ohci->HcCommandStatus = bit(1);
+
 	print_str("usb ohci initialization successful\n");
+	/*
+transfer descriptor ready:
+hardware descriptor fields: flags: $f2000000; CBP: $004f59a0; NextTD: $007ab030; BE: $004f59a7; 
+; #8 bytes in transfer:
+0005010000000000
+transfer descriptor ready:
+hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060; BE: $00000000; 
+; #0 bytes in transfer:
+*/
 }
 
 #if 0
@@ -415,6 +491,7 @@ ohci HcRhPortStatus 11 cells + + @ 		\ Root hub port status access, index 11: re
 IRQ exit
 ohci HcRhPortStatus 0 cells + + @ 		\ Root hub port status access, index 0: read : $00000103: CCS: 1; PES: 1; PSS: 0; POCI: 0; PRS: 0; PPS: 1; LSDA: 0; CSC: 0; PESC: 0; PSSC: 0; OCIC: 0; PRSC: 0; 
 ohci HcRhPortStatus 0 cells + + @ 		\ Root hub port status access, index 0: read : $00000103: CCS: 1; PES: 1; PSS: 0; POCI: 0; PRS: 0; PPS: 1; LSDA: 0; CSC: 0; PESC: 0; PSSC: 0; OCIC: 0; PRSC: 0; 
+
 transfer descriptor ready:
 hardware descriptor fields: flags: $f2000000; CBP: $004f59a0; NextTD: $007ab030; BE: $004f59a7; 
 ; #8 bytes in transfer:

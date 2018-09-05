@@ -329,7 +329,7 @@ vkjnfdkjvnfdkjvnfdk
 [then]
 
 .( enable usb ohci bus mastering)cr cr
-0 6 0 make-pci-config-address dup
+0 6 0 make-pci-config-address 4 + dup
 IO-PCICFG outpl IO-PCIDATA inpw 6 ( memory space, and bus master) or swap
 IO-PCICFG outpl IO-PCIDATA outpw
 
