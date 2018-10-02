@@ -108,7 +108,10 @@ static volatile struct ohci_td * allot_td(void)
 {
 int x;
 	if ((x = find_first_clear(bitmap_used_tds)) == -1)
+	{
+		*(int*)0=0;
 		return 0;
+	}
 	bitmap_used_tds |= 1 << x;
 	return tds + x;
 }
@@ -209,13 +212,16 @@ static volatile struct ohci_hcca ohci_hcca;
 
 static volatile struct ohci_registers * ohci;
 
+static uint8_t device_descriptor[18];
 static const struct
 {
 	uint8_t set_address[8];
+	uint8_t get_device_descriptor[8];
 }
 usb_request_packets =
 {
 	.set_address = { 0x00, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, },
+	.get_device_descriptor = { 0x80, 0x06, 0x00, 0x01, 0x00, 0x00, 0x12, 0x00, },
 };
 
 
@@ -270,10 +276,21 @@ abort:
 	control_ed->next = 0;
 	control_ed->head = td = allot_td();
 
+	/*
+	   set address:
+
+transfer descriptor ready:
+hardware descriptor fields: flags: $f2000000; CBP: $004f59a0; NextTD: $007ab030; BE: $004f59a7; 
+; #8 bytes in transfer:
+0005010000000000
+transfer descriptor ready:
+hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060; BE: $00000000; 
+; #0 bytes in transfer:
+*/
 	/* setup stage of control transfer */
 	td->flags = 0xf2000000;
 	td->current_buffer = usb_request_packets.set_address;
-	td->buffer_end = usb_request_packets.set_address + sizeof usb_request_packets.set_address;
+	td->buffer_end = usb_request_packets.set_address + sizeof usb_request_packets.set_address - 1;
 	td->next = allot_td();
 	td = td->next;
 	/* no data stage for control trasfer */
@@ -307,16 +324,66 @@ abort:
 	if (ohci->HcRhPortStatus[0] != 0x103)
 		goto abort;
 	control_ed->flags = 0x40 << 16;
+	/* set CLF (control list filled flag) - issue a usb host controller transfer request */
 	ohci->HcCommandStatus = bit(1);
 
 	print_str("usb ohci initialization successful\n");
-	/*
+
+	print_str("waiting for set address transfer to complete...");
+	while (control_ed->head != control_ed->tail)
+		;
+	print_str("done\n");
+	if (ohci->HcCommandStatus & bit(1))
+		goto abort;
+	///////xxxxxxxxxx??????????????
+	ohci->HcInterruptStatus = ohci->HcInterruptStatus;
+	ohci->HcControlCurrentED = 0;
+
+	/* issue a 'read device descriptor' control transfer */
+	/* control setup stage */
+	td = td->next;
+	//////// redundant control_ed->head = td;
+	td->flags = 0xf2000000;
+	td->current_buffer = usb_request_packets.get_device_descriptor;
+	td->buffer_end = usb_request_packets.get_device_descriptor + sizeof usb_request_packets.get_device_descriptor - 1;
+	td->next = allot_td();
+	td = td->next;
+	/* control data IN stage */
+	td->flags = 0xf3100000;
+	td->current_buffer = device_descriptor;
+	td->buffer_end = device_descriptor + sizeof device_descriptor - 1;
+	td->next = allot_td();
+	td = td->next;
+	/* control handshake stage */
+	td->flags = 0xf3080000;
+	td->current_buffer = td->buffer_end = 0;
+	td->next = /* empty place holder transfer descriptor */ control_ed->tail = allot_td();
+
+	/* set CLF (control list filled flag) - issue a usb host controller transfer request */
+	ohci->HcCommandStatus = bit(1);
+
+#if 1
+	print_str("waiting for read device descriptor transfer to complete...");
+	while (control_ed->head != control_ed->tail)
+		;
+	print_str("done\n");
+#endif
+	print_str("xxx???\n");
+	sf_push((cell) device_descriptor);
+
+
+/*
+   read device descriptor:
 transfer descriptor ready:
-hardware descriptor fields: flags: $f2000000; CBP: $004f59a0; NextTD: $007ab030; BE: $004f59a7; 
+hardware descriptor fields: flags: $f2000000; CBP: $002dc724; NextTD: $007ab000; BE: $002dc72b; 
 ; #8 bytes in transfer:
-0005010000000000
+8006000100001200
 transfer descriptor ready:
-hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060; BE: $00000000; 
+hardware descriptor fields: flags: $f3100000; CBP: $002dc724; NextTD: $007ab030; BE: $002dc735; 
+; #18 bytes in transfer:
+800600010000120000000000000000000000
+transfer descriptor ready:
+hardware descriptor fields: flags: $f3080000; CBP: $00000000; NextTD: $007ab060; BE: $00000000; 
 ; #0 bytes in transfer:
 */
 }
