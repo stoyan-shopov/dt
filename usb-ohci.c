@@ -291,20 +291,40 @@ hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060;
 	td->flags = 0xf2000000;
 	td->current_buffer = usb_request_packets.set_address;
 	td->buffer_end = usb_request_packets.set_address + sizeof usb_request_packets.set_address - 1;
-	td->next = allot_td();
-	td = td->next;
+	td = td->next = allot_td();
 	/* no data stage for control trasfer */
 	{{{{{{{{{{{{{{{;;;;;;;;;;;;;;;;;}}}}}}}}}}}}}}}
 	/* status stage of control trasfer */
 	td->flags = 0xf3100000;
 	td->current_buffer = td->buffer_end = 0;
 	td->next = /* empty place holder transfer descriptor */ control_ed->tail = allot_td();
+#if 0
+	/* issue a 'read device descriptor' control transfer */
+	/* control setup stage */
+	td = td->next;
+	td->flags = 0xf2000000;
+	td->current_buffer = usb_request_packets.get_device_descriptor;
+	td->buffer_end = usb_request_packets.get_device_descriptor + sizeof usb_request_packets.get_device_descriptor - 1;
+	td = td->next = allot_td();
+	/* control data IN stage */
+	td->flags = 0xf3100000;
+	td->current_buffer = device_descriptor;
+	td->buffer_end = device_descriptor + sizeof device_descriptor - 1;
+	td->next = allot_td();
+	td = td->next;
+	/* control handshake stage */
+	td->flags = 0xf3080000;
+	td->current_buffer = td->buffer_end = 0;
+	td->next = /* empty place holder transfer descriptor */ control_ed->tail = allot_td();
+#endif
 
 	ohci->HcControlHeadED = control_ed;
-	ohci->HcControl |= /* enable control list */ bit(4);
 
+	ohci->HcControl &=~ /* control list enable bit */ bit(4);
 	ohci->HcControlCurrentED = 0;
 	ohci->HcBulkCurrentED = 0;
+	ohci->HcControl |= /* control list enable bit */ bit(4);
+
 	if (ohci->HcRhDescriptorA != 0x20c) 
 		goto abort;
 	/* power on hub ports */
@@ -335,19 +355,31 @@ hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060;
 	print_str("done\n");
 	if (ohci->HcCommandStatus & bit(1))
 		goto abort;
+
+	{
+		struct ohci_td * t = ohci->HcDoneHead;
+		while (t)
+			print_str("retired transfer descriptor at: "), sf_push(t), sf_eval("base @ hex swap u. cr base !"), t = t->next;
+	}
+
 	///////xxxxxxxxxx??????????????
 	ohci->HcInterruptStatus = ohci->HcInterruptStatus;
+	ohci->HcControl &=~ /* control list enable bit */ bit(4);
 	ohci->HcControlCurrentED = 0;
+	/* set function address */
+	control_ed->flags |= 1;
+
+#if 1
 
 	/* issue a 'read device descriptor' control transfer */
 	/* control setup stage */
 	td = td->next;
+	control_ed->head = td;
 	//////// redundant control_ed->head = td;
 	td->flags = 0xf2000000;
 	td->current_buffer = usb_request_packets.get_device_descriptor;
 	td->buffer_end = usb_request_packets.get_device_descriptor + sizeof usb_request_packets.get_device_descriptor - 1;
-	td->next = allot_td();
-	td = td->next;
+	td = td->next = allot_td();
 	/* control data IN stage */
 	td->flags = 0xf3100000;
 	td->current_buffer = device_descriptor;
@@ -359,8 +391,11 @@ hardware descriptor fields: flags: $f3100000; CBP: $00000000; NextTD: $007ab060;
 	td->current_buffer = td->buffer_end = 0;
 	td->next = /* empty place holder transfer descriptor */ control_ed->tail = allot_td();
 
+	ohci->HcControl |= /* control list enable bit */ bit(4);
 	/* set CLF (control list filled flag) - issue a usb host controller transfer request */
 	ohci->HcCommandStatus = bit(1);
+
+#endif
 
 #if 1
 	print_str("waiting for read device descriptor transfer to complete...");
